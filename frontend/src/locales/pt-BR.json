@@ -1,0 +1,53 @@
+{
+  "app": {
+    "title": "Sistema de Gerenciamento de Produtos",
+    "subtitle": "Gerencie seus produtos de forma eficiente e moderna"
+  },
+  "product": {
+    "addNew": "Adicionar Novo Produto",
+    "productName": "Nome do Produto",
+    "price": "Preço",
+    "addProduct": "Adicionar Produto",
+    "productList": "Produtos Cadastrados",
+    "totalProducts": "Total de {{count}} produto(s)",
+    "noProducts": "Nenhum produto encontrado",
+    "noProductsSubtitle": "Adicione seu primeiro produto para começar",
+    "nameRequired": "Por favor, insira o nome do produto",
+    "priceRequired": "Por favor, insira um preço válido",
+    "namePlaceholder": "Digite o nome do produto",
+    "pricePlaceholder": "0,00",
+    "priceNote": "Preços são armazenados em BRL e convertidos automaticamente"
+  },
+  "actions": {
+    "edit": "Editar",
+    "delete": "Deletar",
+    "save": "Salvar Alterações",
+    "cancel": "Cancelar"
+  },
+  "dialog": {
+    "editProduct": "Editar Produto",
+    "editDescription": "Faça alterações no produto aqui. Clique em salvar quando terminar.",
+    "editPriceNote": "Digite o preço em BRL (Real Brasileiro). Será exibido na moeda selecionada."
+  },
+  "currency": {
+    "selectCurrency": "Selecionar Moeda",
+    "storedInBRL": "Preços em BRL",
+    "convertedAutomatically": "Convertido automaticamente",
+    "baseCurrency": "Moeda base: Real Brasileiro (BRL)"
+  },
+  "errors": {
+    "loadProducts": "Erro ao carregar produtos:",
+    "createProduct": "Erro ao criar produto:",
+    "updateProduct": "Erro ao atualizar produto:",
+    "deleteProduct": "Erro ao deletar produto:"
+  },
+  "database": {
+    "connected": "Banco de dados conectado",
+    "disconnected": "Banco de dados indisponível",
+    "retryConnection": "Tentar Reconectar",
+    "retrying": "Reconectando...",
+    "checkStatus": "Verificar Status",
+    "connectionRestored": "Conexão com banco de dados restaurada com sucesso",
+    "healthCheck": "Verificação de Saúde do Banco"
+  }
+}

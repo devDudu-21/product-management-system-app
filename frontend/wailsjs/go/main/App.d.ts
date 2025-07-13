@@ -8,8 +8,12 @@ export function DeleteProduct(arg1:number):Promise<void>;
 
 export function GetAllProducts():Promise<Array<core.Product>>;
 
+export function GetDatabaseStatus():Promise<Record<string, any>>;
+
 export function GetProduct(arg1:number):Promise<core.Product>;
 
 export function Greet(arg1:string):Promise<string>;
+
+export function RetryDatabaseConnection():Promise<Record<string, any>>;
 
 export function UpdateProduct(arg1:number,arg2:string,arg3:number):Promise<core.Product>;

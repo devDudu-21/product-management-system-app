@@ -1,0 +1,53 @@
+{
+  "app": {
+    "title": "Product Management System",
+    "subtitle": "Manage your products efficiently and modernly"
+  },
+  "product": {
+    "addNew": "Add New Product",
+    "productName": "Product Name",
+    "price": "Price",
+    "addProduct": "Add Product",
+    "productList": "Registered Products",
+    "totalProducts": "Total of {{count}} product(s)",
+    "noProducts": "No products found",
+    "noProductsSubtitle": "Add your first product to get started",
+    "nameRequired": "Please enter product name",
+    "priceRequired": "Please enter a valid price",
+    "namePlaceholder": "Enter product name",
+    "pricePlaceholder": "0.00",
+    "priceNote": "Prices are stored in BRL and converted automatically"
+  },
+  "actions": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save Changes",
+    "cancel": "Cancel"
+  },
+  "dialog": {
+    "editProduct": "Edit Product",
+    "editDescription": "Make changes to the product here. Click save when you're done.",
+    "editPriceNote": "Enter the price in BRL (Brazilian Real). It will be displayed in your selected currency."
+  },
+  "currency": {
+    "selectCurrency": "Select Currency",
+    "storedInBRL": "Prices stored in BRL",
+    "convertedAutomatically": "Converted automatically",
+    "baseCurrency": "Base currency: Brazilian Real (BRL)"
+  },
+  "errors": {
+    "loadProducts": "Error loading products:",
+    "createProduct": "Error creating product:",
+    "updateProduct": "Error updating product:",
+    "deleteProduct": "Error deleting product:"
+  },
+  "database": {
+    "connected": "Database connected",
+    "disconnected": "Database unavailable",
+    "retryConnection": "Retry Connection",
+    "retrying": "Reconnecting...",
+    "checkStatus": "Check Status",
+    "connectionRestored": "Database connection restored successfully",
+    "healthCheck": "Database Health Check"
+  }
+}

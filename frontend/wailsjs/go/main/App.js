@@ -14,12 +14,20 @@ export function GetAllProducts() {
   return window['go']['main']['App']['GetAllProducts']();
 }
 
+export function GetDatabaseStatus() {
+  return window['go']['main']['App']['GetDatabaseStatus']();
+}
+
 export function GetProduct(arg1) {
   return window['go']['main']['App']['GetProduct'](arg1);
 }
 
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
+}
+
+export function RetryDatabaseConnection() {
+  return window['go']['main']['App']['RetryDatabaseConnection']();
 }
 
 export function UpdateProduct(arg1, arg2, arg3) {
