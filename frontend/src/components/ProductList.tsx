@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { core } from "wailsjs/go/models";
 import {
@@ -53,11 +53,7 @@ export function ProductList() {
   const [isDatabaseHealthy, setIsDatabaseHealthy] = useState(true);
   const [error, setError] = useState<string>("");
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       setError("");
       const result = await GetAllProducts();
@@ -68,7 +64,11 @@ export function ProductList() {
       setError(errorMessage);
       console.error(t("errors.loadProducts"), error);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    void loadProducts();
+  }, [loadProducts]);
 
   const handleCreateProduct = async () => {
     if (newProductName && newProductPrice > 0) {
@@ -77,7 +77,7 @@ export function ProductList() {
         await CreateProduct(newProductName, newProductPrice);
         setNewProductName("");
         setNewProductPrice(0);
-        loadProducts();
+        void loadProducts();
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
@@ -97,7 +97,7 @@ export function ProductList() {
           editingProduct.price
         );
         setEditingProduct(null);
-        loadProducts();
+        void loadProducts();
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
@@ -111,7 +111,7 @@ export function ProductList() {
     try {
       setError("");
       await DeleteProduct(id);
-      loadProducts();
+      void loadProducts();
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
@@ -159,7 +159,7 @@ export function ProductList() {
               id="productName"
               type="text"
               value={newProductName}
-              onChange={(e) => setNewProductName(e.target.value)}
+              onChange={e => setNewProductName(e.target.value)}
               placeholder={t("product.namePlaceholder")}
               className="h-12 border-2 border-gray-200 focus:border-purple-500 transition-colors"
             />
@@ -185,7 +185,7 @@ export function ProductList() {
           </div>
 
           <Button
-            onClick={handleCreateProduct}
+            onClick={() => void handleCreateProduct()}
             disabled={!isDatabaseHealthy}
             className="h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg btn-glow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -321,8 +321,8 @@ export function ProductList() {
                                 <Input
                                   id="editName"
                                   value={editingProduct?.name || ""}
-                                  onChange={(e) =>
-                                    setEditingProduct((prev) =>
+                                  onChange={e =>
+                                    setEditingProduct(prev =>
                                       prev
                                         ? { ...prev, name: e.target.value }
                                         : null
@@ -341,8 +341,8 @@ export function ProductList() {
                                 <PriceInput
                                   id="editPrice"
                                   value={editingProduct?.price || 0}
-                                  onChange={(value) =>
-                                    setEditingProduct((prev) =>
+                                  onChange={value =>
+                                    setEditingProduct(prev =>
                                       prev ? { ...prev, price: value } : null
                                     )
                                   }
@@ -356,7 +356,7 @@ export function ProductList() {
                             <DialogFooter>
                               <Button
                                 type="submit"
-                                onClick={handleUpdateProduct}
+                                onClick={() => void handleUpdateProduct()}
                                 disabled={!isDatabaseHealthy}
                                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold h-12 px-8 rounded-lg btn-glow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
@@ -370,7 +370,7 @@ export function ProductList() {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleDeleteProduct(product.id)}
+                          onClick={() => void handleDeleteProduct(product.id)}
                           disabled={!isDatabaseHealthy}
                           className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold border-0 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                         >

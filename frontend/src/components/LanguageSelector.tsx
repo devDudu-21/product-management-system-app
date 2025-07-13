@@ -13,10 +13,10 @@ export function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false);
 
   const currentLanguage =
-    languages.find((lang) => lang.code === i18n.language) || languages[0];
+    languages.find(lang => lang.code === i18n.language) || languages[0];
 
   const handleLanguageChange = (languageCode: string) => {
-    i18n.changeLanguage(languageCode);
+    void i18n.changeLanguage(languageCode);
     setIsOpen(false);
   };
 
@@ -35,7 +35,7 @@ export function LanguageSelector() {
 
       {isOpen && (
         <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-          {languages.map((language) => (
+          {languages.map(language => (
             <button
               key={language.code}
               onClick={() => handleLanguageChange(language.code)}

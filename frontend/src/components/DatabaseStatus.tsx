@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   GetDatabaseStatus,
@@ -6,7 +6,7 @@ import {
 } from "../../wailsjs/go/main/App";
 import { Button } from "./ui/button";
 
-interface DatabaseStatus {
+interface DatabaseHealth {
   healthy: boolean;
   error: string;
 }
@@ -19,13 +19,13 @@ export const DatabaseStatus: React.FC<DatabaseStatusProps> = ({
   onStatusChange,
 }) => {
   const { t } = useTranslation();
-  const [status, setStatus] = useState<DatabaseStatus>({
+  const [status, setStatus] = useState<DatabaseHealth>({
     healthy: true,
     error: "",
   });
   const [isRetrying, setIsRetrying] = useState(false);
 
-  const checkStatus = async () => {
+  const checkStatus = useCallback(async () => {
     try {
       const result = await GetDatabaseStatus();
       const newStatus = {
@@ -40,7 +40,7 @@ export const DatabaseStatus: React.FC<DatabaseStatusProps> = ({
       setStatus(errorStatus);
       onStatusChange?.(false);
     }
-  };
+  }, [onStatusChange]);
 
   const retryConnection = async () => {
     setIsRetrying(true);
@@ -57,10 +57,10 @@ export const DatabaseStatus: React.FC<DatabaseStatusProps> = ({
   };
 
   useEffect(() => {
-    checkStatus();
-    const interval = setInterval(checkStatus, 10000);
+    void checkStatus();
+    const interval = setInterval(() => void checkStatus(), 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [checkStatus]);
 
   if (status.healthy) {
     return (
@@ -84,7 +84,7 @@ export const DatabaseStatus: React.FC<DatabaseStatusProps> = ({
 
       <div className="flex gap-2">
         <Button
-          onClick={retryConnection}
+          onClick={() => void retryConnection()}
           disabled={isRetrying}
           size="sm"
           variant="outline"
@@ -92,7 +92,7 @@ export const DatabaseStatus: React.FC<DatabaseStatusProps> = ({
           {isRetrying ? t("database.retrying") : t("database.retryConnection")}
         </Button>
 
-        <Button onClick={checkStatus} size="sm" variant="ghost">
+        <Button onClick={() => void checkStatus()} size="sm" variant="ghost">
           {t("database.checkStatus")}
         </Button>
       </div>

@@ -5,6 +5,11 @@
 [![React](https://img.shields.io/badge/React-18.2.0-61DAFB?style=flat-square&logo=react)](https://reactjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0.2-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.1.8-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com)
+[![CI](https://github.com/devDudu-21/product-management-system-app/workflows/CI/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/ci.yml)
+[![Quality](https://github.com/devDudu-21/product-management-system-app/workflows/Code%20Quality/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/quality.yml)
+[![Security](https://github.com/devDudu-21/product-management-system-app/workflows/Security%20Scan/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/security.yml)
+[![Release](https://github.com/devDudu-21/product-management-system-app/workflows/Release/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/release.yml)
+[![License](https://img.shields.io/github/license/devDudu-21/product-management-system-app?style=flat-square)](LICENSE)
 
 A modern and efficient product management system built with Wails, offering a native desktop experience with modern web technologies.
 
@@ -111,6 +116,77 @@ The project includes scripts for multi-platform builds:
 # Windows
 ./scripts/build-windows.sh
 ```
+
+## 🔄 CI/CD Pipeline
+
+This project includes a comprehensive CI/CD pipeline with multiple automated workflows:
+
+### 🚦 Workflows Overview
+
+| Workflow           | Trigger                 | Purpose                       | Status                                                                                                                                                                                                                 |
+| ------------------ | ----------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **CI**             | Push/PR to main/develop | Continuous Integration        | [![CI](https://github.com/devDudu-21/product-management-system-app/workflows/CI/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/ci.yml)                                      |
+| **Code Quality**   | Push/PR/Schedule        | Code analysis and linting     | [![Quality](https://github.com/devDudu-21/product-management-system-app/workflows/Code%20Quality/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/quality.yml)                |
+| **Security Scan**  | Push/PR/Schedule        | Security vulnerability checks | [![Security](https://github.com/devDudu-21/product-management-system-app/workflows/Security%20Scan/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/security.yml)             |
+| **Build & Test**   | Schedule/Manual         | Multi-platform build testing  | [![Build](https://github.com/devDudu-21/product-management-system-app/workflows/Build%20and%20Test/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/build-test.yml)           |
+| **Performance**    | Schedule/Manual         | Performance benchmarks        | [![Performance](https://github.com/devDudu-21/product-management-system-app/workflows/Performance%20Testing/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/performance.yml) |
+| **Release**        | Tags/Manual             | Automated releases            | [![Release](https://github.com/devDudu-21/product-management-system-app/workflows/Release/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/release.yml)                       |
+| **Staging Deploy** | Push to develop         | Deploy to staging             | [![Staging](https://github.com/devDudu-21/product-management-system-app/workflows/Deploy%20Staging/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/staging.yml)              |
+
+### 🎯 CI Workflow Features
+
+- **Fast Feedback**: Results in ~5-10 minutes
+- **Parallel Execution**: Tests and builds run concurrently
+- **Coverage Reports**: Automatic code coverage with Codecov integration
+- **Artifact Storage**: Build artifacts stored for 7 days
+- **Fail-Fast**: Quick failure detection with detailed logs
+
+### 🏗️ Build Matrix
+
+The project supports building for multiple platforms:
+
+```text
+✅ Linux (amd64)
+✅ Windows (amd64)
+✅ macOS Intel (amd64)
+✅ macOS Apple Silicon (arm64)
+```
+
+### 🔐 Security Features
+
+- **Dependency Scanning**: Weekly automated dependency updates
+- **Vulnerability Checks**: Daily security scans with Gosec
+- **CodeQL Analysis**: Advanced semantic code analysis
+- **SARIF Reports**: Security findings uploaded to GitHub Security tab
+- **Auto-merge**: Safe automatic merging of minor dependency updates
+
+### 📊 Quality Assurance
+
+- **Linting**: golangci-lint for Go, ESLint for TypeScript
+- **Formatting**: Automatic code formatting checks
+- **Testing**: Unit tests with race condition detection
+- **Benchmarks**: Performance regression detection
+- **Memory Profiling**: Memory leak detection
+
+### 🚀 Deployment Pipeline
+
+#### Staging Environment
+
+- **Trigger**: Push to `develop` branch
+- **Purpose**: Automated staging deployments for testing
+- **Features**:
+  - Smoke tests
+  - Build verification
+  - Artifact retention (14 days)
+
+#### Production Releases
+
+- **Trigger**: Git tags (`v*`) or manual dispatch
+- **Features**:
+  - Multi-platform builds
+  - Automatic release notes generation
+  - Asset uploads with detailed descriptions
+  - Pre-release support
 
 ## 📁 Project Structure
 
@@ -236,11 +312,59 @@ npx shadcn-ui@latest add [component]
 
 ## 🤝 Contributing
 
-1. Fork the project
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+We welcome contributions! Our automated CI/CD pipeline ensures code quality and smooth integration.
+
+### Development Workflow
+
+1. **Fork the project**
+2. **Create a feature branch**: `git checkout -b feature/AmazingFeature`
+3. **Make your changes** following our coding standards
+4. **Test locally**: `wails dev` to verify your changes
+5. **Commit your changes**: `git commit -m 'Add some AmazingFeature'`
+6. **Push to the branch**: `git push origin feature/AmazingFeature`
+7. **Open a Pull Request**
+
+### Automated Checks
+
+When you open a PR, our CI/CD pipeline will automatically:
+
+- ✅ **Run tests**: Go unit tests with race detection
+- ✅ **Check code quality**: Linting and formatting validation
+- ✅ **Security scan**: Vulnerability assessment
+- ✅ **Build verification**: Multi-platform build testing
+- ✅ **Dependency review**: Automated dependency analysis
+
+### Coding Standards
+
+- **Go**: Follow `gofmt` formatting and `golangci-lint` rules
+- **TypeScript/React**: Use ESLint configuration and Prettier formatting
+- **Commits**: Use conventional commit messages
+- **Tests**: Add tests for new features and bug fixes
+
+### Local Development Setup
+
+```bash
+# Install dependencies
+cd frontend && npm install && cd ..
+go mod download
+
+# Run in development mode
+wails dev
+
+# Run tests
+go test -race ./...
+cd frontend && npm test
+
+# Check formatting
+gofmt -l .
+cd frontend && npm run lint
+```
+
+### Release Process
+
+- **Patch releases**: Automatic via Dependabot for dependency updates
+- **Minor/Major releases**: Manual tag creation triggers automated release
+- **Staging**: All commits to `develop` branch auto-deploy to staging
 
 ## 📄 License
 

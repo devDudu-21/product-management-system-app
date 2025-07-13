@@ -90,7 +90,7 @@ export class CurrencyService {
         style: "currency",
         currency: currency,
       }).format(amount);
-    } catch (error) {
+    } catch {
       return `${config.symbol} ${amount.toFixed(2)}`;
     }
   }
