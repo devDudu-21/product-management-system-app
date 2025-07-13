@@ -6,8 +6,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0.2-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.1.8-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com)
 [![CI](https://github.com/devDudu-21/product-management-system-app/workflows/CI/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/ci.yml)
-[![Quality](https://github.com/devDudu-21/product-management-system-app/workflows/Code%20Quality/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/quality.yml)
-[![Security](https://github.com/devDudu-21/product-management-system-app/workflows/Security%20Scan/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/security.yml)
 [![Release](https://github.com/devDudu-21/product-management-system-app/workflows/Release/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/release.yml)
 [![License](https://img.shields.io/github/license/devDudu-21/product-management-system-app?style=flat-square)](LICENSE)
 
