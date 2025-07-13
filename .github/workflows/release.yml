@@ -117,12 +117,49 @@ jobs:
           # Make it executable
           chmod +x build/bin/${{ matrix.platform.filename }}
 
-      - name: List build output for debugging
+      - name: List build output for debugging (Unix)
+        if: matrix.platform.os != 'windows'
         run: |
           echo "Contents of build/bin:"
           ls -la build/bin/ || echo "build/bin not found"
           echo "Looking for file: ${{ matrix.platform.filename }}"
           find build/ -name "*${{ matrix.platform.filename }}*" -type f || echo "File not found"
+
+      - name: List build output for debugging (Windows)
+        if: matrix.platform.os == 'windows'
+        shell: pwsh
+        run: |
+          Write-Host "Contents of build/bin:"
+          if (Test-Path "build/bin/") {
+            Get-ChildItem -Path "build/bin/" -Force | Format-Table -AutoSize
+          } else {
+            Write-Host "build/bin not found"
+          }
+          Write-Host "Looking for file: ${{ matrix.platform.filename }}"
+          if (Test-Path "build/") {
+            Get-ChildItem -Path "build/" -Recurse -Filter "*${{ matrix.platform.filename }}*" -ErrorAction SilentlyContinue
+          } else {
+            Write-Host "build directory not found"
+          }
+
+      - name: Verify build output exists (Unix)
+        if: matrix.platform.os != 'windows'
+        run: |
+          if [ ! -f "build/bin/${{ matrix.platform.filename }}" ]; then
+            echo "Error: Build file not found: build/bin/${{ matrix.platform.filename }}"
+            exit 1
+          fi
+          echo "Build file verified: build/bin/${{ matrix.platform.filename }}"
+
+      - name: Verify build output exists (Windows)
+        if: matrix.platform.os == 'windows'
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "build/bin/${{ matrix.platform.filename }}")) {
+            Write-Host "Error: Build file not found: build/bin/${{ matrix.platform.filename }}"
+            exit 1
+          }
+          Write-Host "Build file verified: build/bin/${{ matrix.platform.filename }}"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -149,16 +186,20 @@ jobs:
       - name: List downloaded artifacts
         run: |
           echo "Downloaded artifacts:"
-          find ./artifacts -type f -exec ls -la {} \;
+          find ./artifacts -type f -name "*" 2>/dev/null || echo "No artifacts found"
+          echo "Directory structure:"
+          find ./artifacts -type d 2>/dev/null || echo "No directories found"
 
       - name: Prepare release files
         run: |
           mkdir -p ./release-files
-          # Copy all downloaded artifacts to release-files
-          find ./artifacts -type f -exec cp {} ./release-files/ \;
+          # Copy all downloaded artifacts to release-files with better error handling
+          if [ -d "./artifacts" ]; then
+            find ./artifacts -type f -exec cp {} ./release-files/ \; 2>/dev/null || echo "No files to copy"
+          fi
           # List what we're about to release
           echo "Files to be released:"
-          ls -la ./release-files/
+          ls -la ./release-files/ 2>/dev/null || echo "No release files found"
 
       - name: Get version
         id: get_version
