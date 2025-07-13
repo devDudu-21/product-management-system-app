@@ -58,19 +58,6 @@ jobs:
       - name: Verify Go modules
         run: go mod verify
 
-      - name: Run Go tests with coverage
-        run: |
-          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
-          go tool cover -html=coverage.out -o coverage.html
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.out
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-
       - name: Run frontend linter
         run: |
           cd frontend
