@@ -14,7 +14,7 @@ env:
 
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 20
 
     steps:
@@ -87,7 +87,7 @@ jobs:
           fi
 
   dependency-review:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.event_name == 'pull_request'
     steps:
       - name: Checkout Repository

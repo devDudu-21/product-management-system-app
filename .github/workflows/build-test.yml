@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             platform: linux/amd64
             name: Linux
           - os: windows-latest
@@ -65,7 +65,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+          sudo apt-get install -y libgtk-3-dev  libwebkit2gtk-4.0-dev
 
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest

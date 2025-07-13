@@ -40,9 +40,51 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Check system dependencies
+check_system_deps() {
+    print_info "Checking system dependencies..."
+    
+    # Check for required packages on Linux
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        print_info "Checking Linux system dependencies..."
+        
+        # Check for pkg-config
+        if ! command_exists pkg-config; then
+            print_error "pkg-config is not installed. Please install it:"
+            print_info "sudo apt-get install pkg-config"
+            exit 1
+        fi
+        
+        # Check for GTK3 development libraries
+        if ! pkg-config --exists gtk+-3.0; then
+            print_error "GTK3 development libraries not found. Please install them:"
+            print_info "sudo apt-get install libgtk-3-dev"
+            exit 1
+        fi
+        
+        # Check for WebKit2GTK development libraries
+        if ! pkg-config --exists webkit2gtk-4.0 && ! pkg-config --exists webkit2gtk-4.1; then
+            print_error "WebKit2GTK development libraries not found. Please install them:"
+            print_info "Ubuntu 22.04 and older: sudo apt-get install libwebkit2gtk-4.0-dev"
+            print_info "Ubuntu 24.04 and newer: sudo apt-get install  libwebkit2gtk-4.0-dev"
+            exit 1
+        fi
+        
+        print_success "All Linux system dependencies are installed"
+        
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        print_info "macOS detected - no additional system dependencies required"
+    elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+        print_info "Windows detected - no additional system dependencies required"
+    fi
+}
+
 # Install dependencies
 install_deps() {
     print_info "Installing dependencies..."
+    
+    # Check system dependencies first
+    check_system_deps
     
     # Check Go
     if ! command_exists go; then
@@ -205,6 +247,7 @@ help() {
     echo ""
     echo "Commands:"
     echo "  install     Install all dependencies"
+    echo "  deps        Check system dependencies"
     echo "  dev         Start development server"
     echo "  build       Build the application"
     echo "  test        Run all tests"
@@ -243,6 +286,9 @@ print_header
 case "${1:-help}" in
     "install")
         install_deps
+        ;;
+    "deps")
+        check_system_deps
         ;;
     "dev")
         dev

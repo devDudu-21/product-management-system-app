@@ -11,7 +11,7 @@ env:
 
 jobs:
   deploy-staging:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: staging
     timeout-minutes: 30
 
@@ -36,7 +36,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+          sudo apt-get install -y libgtk-3-dev  libwebkit2gtk-4.0-dev
 
       - name: Install dependencies
         run: |
@@ -89,7 +89,7 @@ jobs:
 
   smoke-test:
     needs: deploy-staging
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
 
     steps:
