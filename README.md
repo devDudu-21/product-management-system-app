@@ -123,15 +123,14 @@ This project includes a comprehensive CI/CD pipeline with multiple automated wor
 
 ### 🚦 Workflows Overview
 
-| Workflow           | Trigger                 | Purpose                       | Status                                                                                                                                                                                                                 |
-| ------------------ | ----------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **CI**             | Push/PR to main/develop | Continuous Integration        | [![CI](https://github.com/devDudu-21/product-management-system-app/workflows/CI/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/ci.yml)                                      |
-| **Code Quality**   | Push/PR/Schedule        | Code analysis and linting     | [![Quality](https://github.com/devDudu-21/product-management-system-app/workflows/Code%20Quality/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/quality.yml)                |
-| **Security Scan**  | Push/PR/Schedule        | Security vulnerability checks | [![Security](https://github.com/devDudu-21/product-management-system-app/workflows/Security%20Scan/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/security.yml)             |
-| **Build & Test**   | Schedule/Manual         | Multi-platform build testing  | [![Build](https://github.com/devDudu-21/product-management-system-app/workflows/Build%20and%20Test/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/build-test.yml)           |
-| **Performance**    | Schedule/Manual         | Performance benchmarks        | [![Performance](https://github.com/devDudu-21/product-management-system-app/workflows/Performance%20Testing/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/performance.yml) |
-| **Release**        | Tags/Manual             | Automated releases            | [![Release](https://github.com/devDudu-21/product-management-system-app/workflows/Release/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/release.yml)                       |
-| **Staging Deploy** | Push to develop         | Deploy to staging             | [![Staging](https://github.com/devDudu-21/product-management-system-app/workflows/Deploy%20Staging/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/staging.yml)              |
+| Workflow           | Trigger                 | Purpose                      | Status                                                                                                                                                                                                                 |
+| ------------------ | ----------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **CI**             | Push/PR to main/develop | Continuous Integration       | [![CI](https://github.com/devDudu-21/product-management-system-app/workflows/CI/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/ci.yml)                                      |
+| **Code Quality**   | Push/PR/Schedule        | Code analysis and linting    | [![Quality](https://github.com/devDudu-21/product-management-system-app/workflows/Code%20Quality/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/quality.yml)                |
+| **Build & Test**   | Schedule/Manual         | Multi-platform build testing | [![Build](https://github.com/devDudu-21/product-management-system-app/workflows/Build%20and%20Test/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/build-test.yml)           |
+| **Performance**    | Schedule/Manual         | Performance benchmarks       | [![Performance](https://github.com/devDudu-21/product-management-system-app/workflows/Performance%20Testing/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/performance.yml) |
+| **Release**        | Tags/Manual             | Automated releases           | [![Release](https://github.com/devDudu-21/product-management-system-app/workflows/Release/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/release.yml)                       |
+| **Staging Deploy** | Push to develop         | Deploy to staging            | [![Staging](https://github.com/devDudu-21/product-management-system-app/workflows/Deploy%20Staging/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/staging.yml)              |
 
 ### 🎯 CI Workflow Features
 
@@ -330,7 +329,6 @@ When you open a PR, our CI/CD pipeline will automatically:
 
 - ✅ **Run tests**: Go unit tests with race detection
 - ✅ **Check code quality**: Linting and formatting validation
-- ✅ **Security scan**: Vulnerability assessment
 - ✅ **Build verification**: Multi-platform build testing
 - ✅ **Dependency review**: Automated dependency analysis
 
