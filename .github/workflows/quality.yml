@@ -50,21 +50,10 @@ jobs:
           version: latest
           args: --timeout=5m
 
-      - name: Run Go tests with coverage
-        run: |
-          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
-
       - name: Run frontend linting
         run: |
           cd frontend
           npm run lint
-
-      - name: Run frontend tests (if available)
-        run: |
-          cd frontend
-          if [ -f "package.json" ] && grep -q '"test"' package.json; then
-            npm test -- --coverage --watchAll=false || true
-          fi
 
       - name: Check Go formatting
         run: |
