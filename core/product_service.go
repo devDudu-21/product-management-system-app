@@ -16,7 +16,7 @@ func NewProductService() *ProductService {
 
 func (s *ProductService) InitDatabase() error {
 	var err error
-	s.db, err = sql.Open("sqlite3", "./products.db")
+	s.db, err = sql.Open("sqlite3", "./database.db")
 	if err != nil {
 		return fmt.Errorf("falha ao abrir o banco de dados: %w", err)
 	}
