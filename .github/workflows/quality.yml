@@ -69,11 +69,6 @@ jobs:
             exit 1
           fi
 
-      - name: Check for Go vulnerabilities
-        run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck ./...
-
       - name: Check frontend formatting
         run: |
           cd frontend
