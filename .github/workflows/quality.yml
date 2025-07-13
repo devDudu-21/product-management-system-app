@@ -44,6 +44,12 @@ jobs:
           cd ..
           go mod download
 
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+          cd ..
+
       - name: Run Go linting
         uses: golangci/golangci-lint-action@v6
         with:

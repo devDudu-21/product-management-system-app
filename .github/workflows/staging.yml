@@ -45,6 +45,27 @@ jobs:
           cd ..
           go mod download
 
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+          cd ..
+
+      - name: Verify embedded assets
+        run: |
+          if [ ! -d "frontend/dist" ]; then
+            echo "❌ frontend/dist directory not found"
+            exit 1
+          fi
+          echo "✅ frontend/dist directory exists"
+          ls -la frontend/dist/
+
+      - name: Run Go linting
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --timeout=5m
+
       - name: Run tests
         run: |
           go test -v -race ./...
