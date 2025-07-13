@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"time"
-	"wails-app/core" 
+
+	"wails-app/core"
 )
 
 // App struct
@@ -26,33 +27,33 @@ func (a *App) startup(ctx context.Context) {
 	// Perform your setup here
 	a.ctx = ctx
 	a.productService = core.NewProductService()
-	
+
 	// Tentativa de inicialização do banco com retry
 	maxRetries := 3
 	retryDelay := time.Second * 2
-	
+
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		err := a.productService.InitDatabase()
 		if err == nil {
 			a.dbHealthy = true
 			a.dbError = ""
-			log.Printf("Banco de dados inicializado com sucesso na tentativa %d", attempt)
+			log.Printf("Database initialized successfully on attempt %d", attempt)
 			return
 		}
-		
-		log.Printf("Tentativa %d/%d de inicialização do banco falhou: %v", attempt, maxRetries, err)
+
+		log.Printf("Database initialization attempt %d/%d failed: %v", attempt, maxRetries, err)
 		a.dbHealthy = false
-		a.dbError = fmt.Sprintf("Falha na inicialização do banco de dados: %v", err)
-		
+		a.dbError = fmt.Sprintf("Database initialization failed: %v", err)
+
 		if attempt < maxRetries {
-			log.Printf("Aguardando %v antes da próxima tentativa...", retryDelay)
+			log.Printf("Waiting %v before next attempt...", retryDelay)
 			time.Sleep(retryDelay)
 		}
 	}
-	
-	// Se chegou aqui, todas as tentativas falharam
-	log.Printf("ERRO CRÍTICO: Não foi possível inicializar o banco de dados após %d tentativas", maxRetries)
-	log.Printf("A aplicação continuará, mas as operações de banco estarão indisponíveis")
+
+	// If we got here, all attempts failed
+	log.Printf("CRITICAL ERROR: Could not initialize database after %d attempts", maxRetries)
+	log.Printf("Application will continue, but database operations will be unavailable")
 }
 
 // domReady is called after front-end resources have been loaded
@@ -86,34 +87,34 @@ func (a *App) GetDatabaseStatus() map[string]interface{} {
 	}
 }
 
-// RetryDatabaseConnection tenta reconectar ao banco de dados
+// RetryDatabaseConnection tries to reconnect to the database
 func (a *App) RetryDatabaseConnection() map[string]interface{} {
-	log.Println("Tentando reconectar ao banco de dados...")
-	
+	log.Println("Trying to reconnect to database...")
+
 	err := a.productService.InitDatabase()
 	if err != nil {
 		a.dbHealthy = false
-		a.dbError = fmt.Sprintf("Falha na reconexão: %v", err)
-		log.Printf("Falha na reconexão: %v", err)
+		a.dbError = fmt.Sprintf("Reconnection failed: %v", err)
+		log.Printf("Reconnection failed: %v", err)
 		return map[string]interface{}{
 			"success": false,
 			"error":   a.dbError,
 		}
 	}
-	
+
 	a.dbHealthy = true
 	a.dbError = ""
-	log.Println("Reconexão ao banco de dados bem-sucedida!")
+	log.Println("Database reconnection successful!")
 	return map[string]interface{}{
 		"success": true,
-		"message": "Conexão com banco de dados restaurada com sucesso",
+		"message": "Database connection restored successfully",
 	}
 }
 
-// checkDatabaseHealth verifica se o banco está saudável antes de operações
+// checkDatabaseHealth verifies if the database is healthy before operations
 func (a *App) checkDatabaseHealth() error {
 	if !a.dbHealthy {
-		return fmt.Errorf("banco de dados não está disponível: %s", a.dbError)
+		return fmt.Errorf("database is not available: %s", a.dbError)
 	}
 	return nil
 }

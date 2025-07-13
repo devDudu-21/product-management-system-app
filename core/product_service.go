@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	_ "github.com/mattn/go-sqlite3" 
+
+	_ "github.com/mattn/go-sqlite3"
 )
+
 type ProductService struct {
 	db *sql.DB
 }
@@ -18,7 +20,7 @@ func (s *ProductService) InitDatabase() error {
 	var err error
 	s.db, err = sql.Open("sqlite3", "./database.db")
 	if err != nil {
-		return fmt.Errorf("falha ao abrir o banco de dados: %w", err)
+		return fmt.Errorf("failed to open database: %w", err)
 	}
 
 	createTableSQL := `
@@ -30,41 +32,41 @@ func (s *ProductService) InitDatabase() error {
 
 	_, err = s.db.Exec(createTableSQL)
 	if err != nil {
-		return fmt.Errorf("falha ao criar a tabela de produtos: %w", err)
+		return fmt.Errorf("failed to create products table: %w", err)
 	}
-	log.Println("Banco de dados SQLite e tabela 'products' inicializados com sucesso!")
+	log.Println("SQLite database and 'products' table initialized successfully!")
 	return nil
 }
 
 func (s *ProductService) CloseDatabase() {
 	if s.db != nil {
 		s.db.Close()
-		log.Println("Conexão com o banco de dados fechada.")
+		log.Println("Database connection closed.")
 	}
 }
 
-// HealthCheck verifica se a conexão com o banco está funcionando
+// verify if the database connection is healthy
 func (s *ProductService) HealthCheck() error {
 	if s.db == nil {
-		return fmt.Errorf("conexão com banco de dados não foi estabelecida")
+		return fmt.Errorf("database connection not established")
 	}
-	
-	// Tenta fazer um ping no banco para verificar se está respondendo
+
+	// tries to ping the database to check if it's active
 	if err := s.db.Ping(); err != nil {
-		return fmt.Errorf("banco de dados não está respondendo: %w", err)
+		return fmt.Errorf("database is not active: %w", err)
 	}
-	
+
 	return nil
 }
 
 func (s *ProductService) CreateProduct(name string, price float64) (*Product, error) {
 	res, err := s.db.Exec("INSERT INTO products(name, price) VALUES(?, ?)", name, price)
 	if err != nil {
-		return nil, fmt.Errorf("falha ao criar produto: %w", err)
+		return nil, fmt.Errorf("failed to create product: %w", err)
 	}
 	id, _ := res.LastInsertId()
 	product := &Product{ID: int(id), Name: name, Price: price}
-	log.Printf("Produto criado: %+v\n", product)
+	log.Printf("Product created: %+v\n", product)
 	return product, nil
 }
 
@@ -74,18 +76,18 @@ func (s *ProductService) GetProductByID(id int) (*Product, error) {
 	err := row.Scan(&product.ID, &product.Name, &product.Price)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("produto com ID %d não encontrado", id)
+			return nil, fmt.Errorf("product with ID %d not found", id)
 		}
-		return nil, fmt.Errorf("falha ao buscar produto: %w", err)
+		return nil, fmt.Errorf("failed to fetch product: %w", err)
 	}
-	log.Printf("Produto encontrado: %+v\n", product)
+	log.Printf("Product found: %+v\n", product)
 	return &product, nil
 }
 
 func (s *ProductService) GetAllProducts() ([]*Product, error) {
 	rows, err := s.db.Query("SELECT id, name, price FROM products")
 	if err != nil {
-		return nil, fmt.Errorf("falha ao buscar produtos: %w", err)
+		return nil, fmt.Errorf("failed to fetch products: %w", err)
 	}
 	defer rows.Close()
 
@@ -93,37 +95,37 @@ func (s *ProductService) GetAllProducts() ([]*Product, error) {
 	for rows.Next() {
 		var product Product
 		if err := rows.Scan(&product.ID, &product.Name, &product.Price); err != nil {
-			return nil, fmt.Errorf("falha ao escanear produto: %w", err)
+			return nil, fmt.Errorf("failed to scan product: %w", err)
 		}
 		products = append(products, &product)
 	}
-	log.Printf("Produtos encontrados: %d\n", len(products))
+	log.Printf("Products found: %d\n", len(products))
 	return products, nil
 }
 
 func (s *ProductService) UpdateProduct(id int, name string, price float64) (*Product, error) {
 	result, err := s.db.Exec("UPDATE products SET name = ?, price = ? WHERE id = ?", name, price, id)
 	if err != nil {
-		return nil, fmt.Errorf("falha ao atualizar produto: %w", err)
+		return nil, fmt.Errorf("failed to update product: %w", err)
 	}
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return nil, fmt.Errorf("produto com ID %d não encontrado", id)
+		return nil, fmt.Errorf("product with ID %d not found", id)
 	}
 	product := &Product{ID: id, Name: name, Price: price}
-	log.Printf("Produto atualizado: %+v\n", product)
+	log.Printf("Product updated: %+v\n", product)
 	return product, nil
 }
 
 func (s *ProductService) DeleteProduct(id int) error {
 	result, err := s.db.Exec("DELETE FROM products WHERE id = ?", id)
 	if err != nil {
-		return fmt.Errorf("falha ao deletar produto: %w", err)
+		return fmt.Errorf("failed to delete product: %w", err)
 	}
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("produto com ID %d não encontrado", id)
+		return fmt.Errorf("product with ID %d not found", id)
 	}
-	log.Printf("Produto deletado: ID %d\n", id)
+	log.Printf("Product deleted: ID %d\n", id)
 	return nil
 }
