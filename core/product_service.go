@@ -43,6 +43,20 @@ func (s *ProductService) CloseDatabase() {
 	}
 }
 
+// HealthCheck verifica se a conexão com o banco está funcionando
+func (s *ProductService) HealthCheck() error {
+	if s.db == nil {
+		return fmt.Errorf("conexão com banco de dados não foi estabelecida")
+	}
+	
+	// Tenta fazer um ping no banco para verificar se está respondendo
+	if err := s.db.Ping(); err != nil {
+		return fmt.Errorf("banco de dados não está respondendo: %w", err)
+	}
+	
+	return nil
+}
+
 func (s *ProductService) CreateProduct(name string, price float64) (*Product, error) {
 	res, err := s.db.Exec("INSERT INTO products(name, price) VALUES(?, ?)", name, price)
 	if err != nil {
