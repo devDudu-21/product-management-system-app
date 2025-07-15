@@ -147,14 +147,6 @@ The project supports building for multiple platforms:
 ✅ macOS Apple Silicon (arm64)
 ```
 
-### 🔐 Security Features
-
-- **Dependency Scanning**: Weekly automated dependency updates
-- **Vulnerability Checks**: Daily security scans with Gosec
-- **CodeQL Analysis**: Advanced semantic code analysis
-- **SARIF Reports**: Security findings uploaded to GitHub Security tab
-- **Auto-merge**: Safe automatic merging of minor dependency updates
-
 ### 📊 Quality Assurance
 
 - **Linting**: golangci-lint for Go, ESLint for TypeScript
