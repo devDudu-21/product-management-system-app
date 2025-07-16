@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
+	"github.com/wailsapp/wails/v2/pkg/runtime" 
 	"wails-app/core"
 )
 
@@ -27,8 +27,8 @@ func (a *App) startup(ctx context.Context) {
 	// Perform your setup here
 	a.ctx = ctx
 	a.productService = core.NewProductService()
+	a.productService.SetContext(ctx) 
 
-	// Tentativa de inicialização do banco com retry
 	maxRetries := 3
 	retryDelay := time.Second * 2
 
@@ -37,23 +37,22 @@ func (a *App) startup(ctx context.Context) {
 		if err == nil {
 			a.dbHealthy = true
 			a.dbError = ""
-			log.Printf("Database initialized successfully on attempt %d", attempt)
+			runtime.LogInfo(a.ctx, fmt.Sprintf("Database initialized successfully on attempt %d", attempt)) 
 			return
 		}
 
-		log.Printf("Database initialization attempt %d/%d failed: %v", attempt, maxRetries, err)
+		runtime.LogWarning(a.ctx, fmt.Sprintf("Database initialization attempt %d/%d failed: %v", attempt, maxRetries, err)) 
 		a.dbHealthy = false
 		a.dbError = fmt.Sprintf("Database initialization failed: %v", err)
 
 		if attempt < maxRetries {
-			log.Printf("Waiting %v before next attempt...", retryDelay)
+			runtime.LogInfo(a.ctx, fmt.Sprintf("Waiting %v before next attempt...", retryDelay)) 
 			time.Sleep(retryDelay)
 		}
 	}
 
-	// If we got here, all attempts failed
-	log.Printf("CRITICAL ERROR: Could not initialize database after %d attempts", maxRetries)
-	log.Printf("Application will continue, but database operations will be unavailable")
+	runtime.LogFatal(a.ctx, fmt.Sprintf("CRITICAL ERROR: Could not initialize database after %d attempts", maxRetries)) 
+	runtime.LogWarning(a.ctx, "Application will continue, but database operations will be unavailable") 
 }
 
 // domReady is called after front-end resources have been loaded
@@ -76,6 +75,7 @@ func (a *App) shutdown(ctx context.Context) {
 
 // Greet returns a greeting for the given name (método de exemplo do template)
 func (a *App) Greet(name string) string {
+	runtime.LogInfo(a.ctx, fmt.Sprintf("Greet method called with name: %s", name))
 	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
 
@@ -89,13 +89,13 @@ func (a *App) GetDatabaseStatus() map[string]interface{} {
 
 // RetryDatabaseConnection tries to reconnect to the database
 func (a *App) RetryDatabaseConnection() map[string]interface{} {
-	log.Println("Trying to reconnect to database...")
+	runtime.LogInfo(a.ctx, "Trying to reconnect to database...")
 
 	err := a.productService.InitDatabase()
 	if err != nil {
 		a.dbHealthy = false
 		a.dbError = fmt.Sprintf("Reconnection failed: %v", err)
-		log.Printf("Reconnection failed: %v", err)
+		runtime.LogError(a.ctx, fmt.Sprintf("Reconnection failed: %v", err)) 
 		return map[string]interface{}{
 			"success": false,
 			"error":   a.dbError,
@@ -104,7 +104,7 @@ func (a *App) RetryDatabaseConnection() map[string]interface{} {
 
 	a.dbHealthy = true
 	a.dbError = ""
-	log.Println("Database reconnection successful!")
+	runtime.LogInfo(a.ctx, "Database reconnection successful!") 
 	return map[string]interface{}{
 		"success": true,
 		"message": "Database connection restored successfully",
@@ -122,6 +122,7 @@ func (a *App) checkDatabaseHealth() error {
 // CRUD methods to interact with ProductService
 func (a *App) CreateProduct(name string, price float64) (*core.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("CreateProduct failed: %v", err))
 		return nil, err
 	}
 	return a.productService.CreateProduct(name, price)
@@ -129,6 +130,7 @@ func (a *App) CreateProduct(name string, price float64) (*core.Product, error) {
 
 func (a *App) GetProduct(id int) (*core.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("GetProduct failed: %v", err))
 		return nil, err
 	}
 	return a.productService.GetProductByID(id)
@@ -136,6 +138,7 @@ func (a *App) GetProduct(id int) (*core.Product, error) {
 
 func (a *App) GetAllProducts() ([]*core.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("GetAllProducts failed: %v", err)) 
 		return nil, err
 	}
 	return a.productService.GetAllProducts()
@@ -143,6 +146,7 @@ func (a *App) GetAllProducts() ([]*core.Product, error) {
 
 func (a *App) UpdateProduct(id int, name string, price float64) (*core.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("UpdateProduct failed: %v", err)) 
 		return nil, err
 	}
 	return a.productService.UpdateProduct(id, name, price)
@@ -150,6 +154,7 @@ func (a *App) UpdateProduct(id int, name string, price float64) (*core.Product, 
 
 func (a *App) DeleteProduct(id int) error {
 	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("DeleteProduct failed: %v", err)) 
 		return err
 	}
 	return a.productService.DeleteProduct(id)

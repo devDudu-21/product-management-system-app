@@ -1,15 +1,22 @@
 package core
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
-	"log"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type ProductService struct {
 	db *sql.DB
+	ctx context.Context
+}
+
+func (s *ProductService) SetContext(ctx context.Context) {
+	s.ctx = ctx
+	runtime.LogInfo(s.ctx, "Context set for ProductService")
 }
 
 func NewProductService() *ProductService {
@@ -20,9 +27,9 @@ func (s *ProductService) InitDatabase() error {
 	var err error
 	s.db, err = sql.Open("sqlite3", "./database.db")
 	if err != nil {
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to open database: %v", err)) 
 		return fmt.Errorf("failed to open database: %w", err)
 	}
-
 	createTableSQL := `
 	CREATE TABLE IF NOT EXISTS products (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,39 +41,43 @@ func (s *ProductService) InitDatabase() error {
 	if err != nil {
 		return fmt.Errorf("failed to create products table: %w", err)
 	}
-	log.Println("SQLite database and 'products' table initialized successfully!")
+	runtime.LogInfo(s.ctx, "SQLite database and 'products' table initialized successfully!") 
 	return nil
 }
 
 func (s *ProductService) CloseDatabase() {
 	if s.db != nil {
 		s.db.Close()
-		log.Println("Database connection closed.")
+		runtime.LogInfo(s.ctx, "Database connection closed.")
 	}
 }
 
 // verify if the database connection is healthy
 func (s *ProductService) HealthCheck() error {
 	if s.db == nil {
+		runtime.LogError(s.ctx, "Database connection not established") 
 		return fmt.Errorf("database connection not established")
 	}
 
 	// tries to ping the database to check if it's active
 	if err := s.db.Ping(); err != nil {
-		return fmt.Errorf("database is not active: %w", err)
+		runtime.LogError(s.ctx, fmt.Sprintf("Database connection is not healthy: %v", err)) 
+		return fmt.Errorf("database connection is not healthy: %w", err)
 	}
 
+	runtime.LogInfo(s.ctx, "Database connection is healthy.")
 	return nil
 }
 
 func (s *ProductService) CreateProduct(name string, price float64) (*Product, error) {
 	res, err := s.db.Exec("INSERT INTO products(name, price) VALUES(?, ?)", name, price)
 	if err != nil {
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to create product: %v", err)) 
 		return nil, fmt.Errorf("failed to create product: %w", err)
 	}
 	id, _ := res.LastInsertId()
 	product := &Product{ID: int(id), Name: name, Price: price}
-	log.Printf("Product created: %+v\n", product)
+	runtime.LogInfo(s.ctx, fmt.Sprintf("Product created: %+v", product))
 	return product, nil
 }
 
@@ -76,17 +87,20 @@ func (s *ProductService) GetProductByID(id int) (*Product, error) {
 	err := row.Scan(&product.ID, &product.Name, &product.Price)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			runtime.LogWarning(s.ctx, fmt.Sprintf("Product with ID %d not found", id)) 
 			return nil, fmt.Errorf("product with ID %d not found", id)
 		}
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to fetch product with ID %d: %v", id, err)) 
 		return nil, fmt.Errorf("failed to fetch product: %w", err)
 	}
-	log.Printf("Product found: %+v\n", product)
+	runtime.LogInfo(s.ctx, fmt.Sprintf("Product found: %+v", product))
 	return &product, nil
 }
 
 func (s *ProductService) GetAllProducts() ([]*Product, error) {
 	rows, err := s.db.Query("SELECT id, name, price FROM products")
 	if err != nil {
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to fetch products: %v", err)) 
 		return nil, fmt.Errorf("failed to fetch products: %w", err)
 	}
 	defer rows.Close()
@@ -95,37 +109,42 @@ func (s *ProductService) GetAllProducts() ([]*Product, error) {
 	for rows.Next() {
 		var product Product
 		if err := rows.Scan(&product.ID, &product.Name, &product.Price); err != nil {
+			runtime.LogError(s.ctx, fmt.Sprintf("Failed to scan product: %v", err)) 
 			return nil, fmt.Errorf("failed to scan product: %w", err)
 		}
 		products = append(products, &product)
 	}
-	log.Printf("Products found: %d\n", len(products))
+	runtime.LogInfo(s.ctx, fmt.Sprintf("Products found: %d", len(products)))
 	return products, nil
 }
 
 func (s *ProductService) UpdateProduct(id int, name string, price float64) (*Product, error) {
 	result, err := s.db.Exec("UPDATE products SET name = ?, price = ? WHERE id = ?", name, price, id)
 	if err != nil {
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to update product with ID %d: %v", id, err)) 
 		return nil, fmt.Errorf("failed to update product: %w", err)
 	}
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
+		runtime.LogWarning(s.ctx, fmt.Sprintf("Product with ID %d not found for update", id)) 
 		return nil, fmt.Errorf("product with ID %d not found", id)
 	}
 	product := &Product{ID: id, Name: name, Price: price}
-	log.Printf("Product updated: %+v\n", product)
+	runtime.LogInfo(s.ctx, fmt.Sprintf("Product updated: %+v", product)) 
 	return product, nil
 }
 
 func (s *ProductService) DeleteProduct(id int) error {
 	result, err := s.db.Exec("DELETE FROM products WHERE id = ?", id)
 	if err != nil {
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to delete product with ID %d: %v", id, err)) 
 		return fmt.Errorf("failed to delete product: %w", err)
 	}
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
+		runtime.LogWarning(s.ctx, fmt.Sprintf("Product with ID %d not found for deletion", id)) 
 		return fmt.Errorf("product with ID %d not found", id)
 	}
-	log.Printf("Product deleted: ID %d\n", id)
+	runtime.LogInfo(s.ctx, fmt.Sprintf("Product deleted: ID %d", id)) 
 	return nil
 }
