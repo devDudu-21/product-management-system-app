@@ -32,19 +32,19 @@ jobs:
           - runner: ubuntu-22.04
             os: linux
             arch: amd64
-            filename: wails-app-linux-amd64
+            filename: product-management-app-linux-amd64
           - runner: windows-latest
             os: windows
             arch: amd64
-            filename: wails-app-windows-amd64.exe
+            filename: product-management-app-windows-amd64.exe
           - runner: macos-13
             os: darwin
             arch: amd64
-            filename: wails-app-darwin-amd64
+            filename: product-management-app-darwin-amd64
           - runner: macos-13
             os: darwin
             arch: arm64
-            filename: wails-app-darwin-arm64
+            filename: product-management-app-darwin-arm64
 
     runs-on: ${{ matrix.platform.runner }}
 
@@ -102,7 +102,7 @@ jobs:
           # List what was created to debug
           ls -la build/bin/
           # Copy the executable from the .app bundle
-          cp build/bin/wails-app.app/Contents/MacOS/wails-app build/bin/${{ matrix.platform.filename }}
+          cp build/bin/product-management-app.app/Contents/MacOS/product-management-app build/bin/${{ matrix.platform.filename }}
           # Make it executable
           chmod +x build/bin/${{ matrix.platform.filename }}
 
@@ -113,7 +113,7 @@ jobs:
           # List what was created to debug
           ls -la build/bin/
           # Copy the executable from the .app bundle
-          cp build/bin/wails-app.app/Contents/MacOS/wails-app build/bin/${{ matrix.platform.filename }}
+          cp build/bin/product-management-app.app/Contents/MacOS/product-management-app build/bin/${{ matrix.platform.filename }}
           # Make it executable
           chmod +x build/bin/${{ matrix.platform.filename }}
 
@@ -224,14 +224,14 @@ jobs:
             ### 📥 Downloads
             Choose the appropriate version for your operating system:
 
-            - **Windows**: `wails-app-windows-amd64.exe`
-            - **macOS (Intel)**: `wails-app-darwin-amd64`
-            - **macOS (Apple Silicon)**: `wails-app-darwin-arm64`
-            - **Linux**: `wails-app-linux-amd64`
+            - **Windows**: `product-management-app-windows-amd64.exe`
+            - **macOS (Intel)**: `product-management-app-darwin-amd64`
+            - **macOS (Apple Silicon)**: `product-management-app-darwin-arm64`
+            - **Linux**: `product-management-app-linux-amd64`
 
             ### 🔧 Installation
             1. Download the appropriate file for your OS
-            2. Make it executable (Unix systems): `chmod +x wails-app-*`
+            2. Make it executable (Unix systems): `chmod +x product-management-app-*`
             3. Run the application
 
             ### 📝 Release Notes

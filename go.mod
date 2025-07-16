@@ -1,4 +1,4 @@
-module wails-app
+module product-management-app
 
 go 1.22.0
 

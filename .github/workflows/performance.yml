@@ -64,7 +64,7 @@ jobs:
       - name: Check binary size
         run: |
           ls -lh build/bin/
-          echo "Binary size: $(du -h build/bin/wails-app | cut -f1)"
+          echo "Binary size: $(du -h build/bin/product-management-app | cut -f1)"
 
       - name: Frontend bundle analysis
         run: |
