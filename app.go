@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"product-management-app/core/dto"
 	"time"
+
+	"product-management-app/core"
+	"product-management-app/core/dto"
 
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"product-management-app/core"
 )
 
 // App struct
