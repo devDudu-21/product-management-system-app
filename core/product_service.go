@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"product-management-app/core/dto"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type ProductService struct {
@@ -97,8 +98,47 @@ func (s *ProductService) GetProductByID(id int) (*Product, error) {
 	return &product, nil
 }
 
-func (s *ProductService) GetAllProducts() ([]*Product, error) {
-	rows, err := s.db.Query("SELECT id, name, price FROM products")
+func (s *ProductService) GetAllProducts(params pagination_dto.PaginationDTO) (*PaginationResponse, error) {
+
+	baseQuery := "SELECT id, name, price FROM products"
+	countQuery := "SELECT COUNT(*) FROM products"
+	
+	var whereClause string
+	var args []interface{}
+	
+	if params.Search != "" {
+		whereClause = " WHERE name LIKE ?"
+		args = append(args, "%"+params.Search+"%")
+	}
+	
+	var totalCount int
+	err := s.db.QueryRow(countQuery + whereClause, args...).Scan(&totalCount)
+	if err != nil {
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to count products: %v", err))
+		return nil, fmt.Errorf("failed to count products: %w", err)
+	}
+	
+	totalPages := (totalCount + params.PageSize - 1) / params.PageSize
+	
+	query := baseQuery + whereClause
+	
+	orderBy := "id"
+	if params.SortBy != "" {
+		orderBy = params.SortBy
+	}
+	
+	order := "ASC"
+	if params.Order == "desc" {
+		order = "DESC"
+	}
+	
+	query += " ORDER BY " + orderBy + " " + order
+	
+	offset := (params.Page - 1) * params.PageSize
+	query += " LIMIT ? OFFSET ?"
+	args = append(args, params.PageSize, offset)
+	
+	rows, err := s.db.Query(query, args...)
 	if err != nil {
 		runtime.LogError(s.ctx, fmt.Sprintf("Failed to fetch products: %v", err))
 		return nil, fmt.Errorf("failed to fetch products: %w", err)
@@ -114,8 +154,17 @@ func (s *ProductService) GetAllProducts() ([]*Product, error) {
 		}
 		products = append(products, &product)
 	}
-	runtime.LogInfo(s.ctx, fmt.Sprintf("Products found: %d", len(products)))
-	return products, nil
+	
+	response := &PaginationResponse{
+		Products:   products,
+		TotalCount: totalCount,
+		TotalPages: totalPages,
+		Page:       params.Page,
+		PageSize:   params.PageSize,
+	}
+	
+	runtime.LogInfo(s.ctx, fmt.Sprintf("Products found: %d of %d total", len(products), totalCount))
+	return response, nil
 }
 
 func (s *ProductService) UpdateProduct(id int, name string, price float64) (*Product, error) {

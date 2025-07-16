@@ -16,7 +16,12 @@
     "priceRequired": "Please enter a valid price",
     "namePlaceholder": "Enter product name",
     "pricePlaceholder": "0.00",
-    "priceNote": "Prices are stored in BRL and converted automatically"
+    "priceNote": "Prices are stored in BRL and converted automatically",
+    "searchPlaceholder": "Search products by name...",
+    "sortBy": "Sort by",
+    "sortById": "Sort by ID",
+    "sortByName": "Sort by Name",
+    "sortByPrice": "Sort by Price"
   },
   "actions": {
     "edit": "Edit",
@@ -49,5 +54,9 @@
     "checkStatus": "Check Status",
     "connectionRestored": "Database connection restored successfully",
     "healthCheck": "Database Health Check"
+  },
+  "pagination": {
+    "showing": "Showing {{start}} to {{end}} of {{total}} results",
+    "pageOf": "Page {{current}} of {{total}}"
   }
 }

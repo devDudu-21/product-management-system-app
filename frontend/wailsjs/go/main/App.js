@@ -10,8 +10,8 @@ export function DeleteProduct(arg1) {
   return window['go']['main']['App']['DeleteProduct'](arg1);
 }
 
-export function GetAllProducts() {
-  return window['go']['main']['App']['GetAllProducts']();
+export function GetAllProducts(arg1) {
+  return window['go']['main']['App']['GetAllProducts'](arg1);
 }
 
 export function GetDatabaseStatus() {

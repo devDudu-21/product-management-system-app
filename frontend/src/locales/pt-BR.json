@@ -12,11 +12,16 @@
     "totalProducts": "Total de {{count}} produto(s)",
     "noProducts": "Nenhum produto encontrado",
     "noProductsSubtitle": "Adicione seu primeiro produto para começar",
-    "nameRequired": "Por favor, insira o nome do produto",
-    "priceRequired": "Por favor, insira um preço válido",
+    "nameRequired": "Por favor, digite o nome do produto",
+    "priceRequired": "Por favor, digite um preço válido",
     "namePlaceholder": "Digite o nome do produto",
     "pricePlaceholder": "0,00",
-    "priceNote": "Preços são armazenados em BRL e convertidos automaticamente"
+    "priceNote": "Preços são armazenados em BRL e convertidos automaticamente",
+    "searchPlaceholder": "Buscar produtos por nome...",
+    "sortBy": "Ordenar por",
+    "sortById": "Ordenar por ID",
+    "sortByName": "Ordenar por Nome",
+    "sortByPrice": "Ordenar por Preço"
   },
   "actions": {
     "edit": "Editar",
@@ -49,5 +54,9 @@
     "checkStatus": "Verificar Status",
     "connectionRestored": "Conexão com banco de dados restaurada com sucesso",
     "healthCheck": "Verificação de Saúde do Banco"
+  },
+  "pagination": {
+    "showing": "Mostrando {{start}} a {{end}} de {{total}} resultados",
+    "pageOf": "Página {{current}} de {{total}}"
   }
 }

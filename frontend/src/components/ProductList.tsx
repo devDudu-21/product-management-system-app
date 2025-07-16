@@ -8,6 +8,10 @@ import {
   Trash2,
   Package,
   AlertCircle,
+  Search,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { useCurrency } from "../hooks/useCurrency";
 import { PriceInput } from "./PriceInput";
@@ -40,6 +44,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import {
+  Pagination,
+  PaginationItem,
+  PaginationContent,
+  PaginationPrevious,
+  PaginationLink,
+  PaginationNext,
+  PaginationEllipsis,
+} from "./ui/pagination";
 
 type Product = core.Product;
 
@@ -47,28 +67,203 @@ export function ProductList() {
   const { t } = useTranslation();
   const { formatCurrency, convertFromBRL } = useCurrency();
   const [products, setProducts] = useState<Product[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [newProductName, setNewProductName] = useState("");
   const [newProductPrice, setNewProductPrice] = useState<number>(0);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isDatabaseHealthy, setIsDatabaseHealthy] = useState(true);
+  const [paginationParams, setPaginationParams] = useState({
+    page: 1,
+    pageSize: 10,
+    search: "",
+    sortBy: "id",
+    order: "asc",
+  });
   const [error, setError] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchTimeout, setSearchTimeout] = useState<number | null>(null);
+
+  const renderPageNumbers = () => {
+    const pages = [];
+    const currentPage = paginationParams.page;
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => handlePaginationChange({ page: i })}
+              isActive={i === currentPage}
+              className="cursor-pointer"
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    } else {
+      const showStartEllipsis = currentPage > 3;
+      const showEndEllipsis = currentPage < totalPages - 2;
+
+      pages.push(
+        <PaginationItem key={1}>
+          <PaginationLink
+            onClick={() => handlePaginationChange({ page: 1 })}
+            isActive={1 === currentPage}
+            className="cursor-pointer"
+          >
+            1
+          </PaginationLink>
+        </PaginationItem>
+      );
+
+      if (showStartEllipsis) {
+        pages.push(
+          <PaginationItem key="start-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+
+      const startPage = Math.max(2, currentPage - 1);
+      const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => handlePaginationChange({ page: i })}
+              isActive={i === currentPage}
+              className="cursor-pointer"
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+
+      // Elipses do final
+      if (showEndEllipsis) {
+        pages.push(
+          <PaginationItem key="end-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+
+      if (totalPages > 1) {
+        pages.push(
+          <PaginationItem key={totalPages}>
+            <PaginationLink
+              onClick={() => handlePaginationChange({ page: totalPages })}
+              isActive={totalPages === currentPage}
+              className="cursor-pointer"
+            >
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    }
+
+    return pages;
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    const newTimeout = setTimeout(() => {
+      handlePaginationChange({
+        search: value,
+        page: 1,
+      });
+    }, 500);
+
+    setSearchTimeout(newTimeout);
+  };
+
+  const handleSortChange = (field: string) => {
+    const newOrder =
+      paginationParams.sortBy === field && paginationParams.order === "asc"
+        ? "desc"
+        : "asc";
+
+    handlePaginationChange({
+      sortBy: field,
+      order: newOrder,
+      page: 1,
+    });
+  };
+
+  const getSortIcon = (field: string) => {
+    if (paginationParams.sortBy !== field) {
+      return <ArrowUpDown className="w-4 h-4 text-gray-400" />;
+    }
+    return paginationParams.order === "asc" ? (
+      <ArrowUp className="w-4 h-4 text-blue-600" />
+    ) : (
+      <ArrowDown className="w-4 h-4 text-blue-600" />
+    );
+  };
 
   const loadProducts = useCallback(async () => {
     try {
       setError("");
-      const result = await GetAllProducts();
-      setProducts(result || []);
+      const result = await GetAllProducts(paginationParams);
+      setProducts(result.products || []);
+      setTotalCount(result.totalCount || 0);
+      setTotalPages(result.totalPages || 0);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       setError(errorMessage);
       console.error(t("errors.loadProducts"), error);
     }
-  }, [t]);
+  }, [paginationParams, t]);
+
+  const handlePaginationChange = useCallback(
+    (newParams: {
+      page?: number;
+      pageSize?: number;
+      search?: string;
+      sortBy?: string;
+      order?: "asc" | "desc";
+    }) => {
+      setPaginationParams(prev => ({
+        ...prev,
+        ...newParams,
+      }));
+    },
+    []
+  );
+
+  useEffect(() => {
+    void handlePaginationChange({
+      page: 1,
+      pageSize: 10,
+      search: "",
+      sortBy: "id",
+      order: "asc",
+    });
+  }, [handlePaginationChange]);
 
   useEffect(() => {
     void loadProducts();
   }, [loadProducts]);
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
 
   const handleCreateProduct = async () => {
     if (newProductName && newProductPrice > 0) {
@@ -77,6 +272,7 @@ export function ProductList() {
         await CreateProduct(newProductName, newProductPrice);
         setNewProductName("");
         setNewProductPrice(0);
+        setPaginationParams(prev => ({ ...prev, page: 1 }));
         void loadProducts();
       } catch (error) {
         const errorMessage =
@@ -111,6 +307,11 @@ export function ProductList() {
     try {
       setError("");
       await DeleteProduct(id);
+
+      if (products.length === 1 && paginationParams.page > 1) {
+        setPaginationParams(prev => ({ ...prev, page: prev.page - 1 }));
+      }
+
       void loadProducts();
     } catch (error) {
       const errorMessage =
@@ -198,17 +399,68 @@ export function ProductList() {
       {/* products list card */}
       <div className="glass-card-white rounded-2xl overflow-hidden">
         <div className="p-8 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
-              <Package className="w-6 h-6 text-white" />
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+                <Package className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {t("product.productList")}
+                </h2>
+                <p className="text-gray-600">
+                  {t("product.totalProducts", { count: totalCount })}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">
-                {t("product.productList")}
-              </h2>
-              <p className="text-gray-600">
-                {t("product.totalProducts", { count: products.length })}
-              </p>
+
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder={t("product.searchPlaceholder")}
+                  value={searchTerm}
+                  onChange={e => handleSearchChange(e.target.value)}
+                  className="pl-10 w-64 h-10 border-2 border-gray-200 focus:border-blue-500 transition-colors"
+                />
+              </div>
+
+              <Select
+                value={`${paginationParams.sortBy}-${paginationParams.order}`}
+                onValueChange={value => {
+                  const [sortBy, order] = value.split("-");
+                  handlePaginationChange({
+                    sortBy,
+                    order: order as "asc" | "desc",
+                    page: 1,
+                  });
+                }}
+              >
+                <SelectTrigger className="w-48 h-10 border-2 border-gray-200 focus:border-blue-500">
+                  <SelectValue placeholder={t("product.sortBy")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="id-asc">
+                    {t("product.sortById")} (A-Z)
+                  </SelectItem>
+                  <SelectItem value="id-desc">
+                    {t("product.sortById")} (Z-A)
+                  </SelectItem>
+                  <SelectItem value="name-asc">
+                    {t("product.sortByName")} (A-Z)
+                  </SelectItem>
+                  <SelectItem value="name-desc">
+                    {t("product.sortByName")} (Z-A)
+                  </SelectItem>
+                  <SelectItem value="price-asc">
+                    {t("product.sortByPrice")} (Menor)
+                  </SelectItem>
+                  <SelectItem value="price-desc">
+                    {t("product.sortByPrice")} (Maior)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
@@ -218,16 +470,32 @@ export function ProductList() {
             <TableHeader>
               <TableRow className="bg-gray-50">
                 <TableHead className="px-8 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  ID
+                  <button
+                    onClick={() => handleSortChange("id")}
+                    className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                  >
+                    ID
+                    {getSortIcon("id")}
+                  </button>
                 </TableHead>
                 <TableHead className="px-8 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleSortChange("name")}
+                    className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                  >
                     <ShoppingBag className="w-4 h-4" />
                     {t("product.productName")}
-                  </div>
+                    {getSortIcon("name")}
+                  </button>
                 </TableHead>
                 <TableHead className="px-8 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                  {t("product.price")}
+                  <button
+                    onClick={() => handleSortChange("price")}
+                    className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                  >
+                    {t("product.price")}
+                    {getSortIcon("price")}
+                  </button>
                 </TableHead>
                 <TableHead className="px-8 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
                   {t("actions.edit")} / {t("actions.delete")}
@@ -385,6 +653,66 @@ export function ProductList() {
             </TableBody>
           </Table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex justify-center pb-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => {
+                      if (paginationParams.page > 1) {
+                        handlePaginationChange({
+                          page: Math.max(paginationParams.page - 1, 1),
+                        });
+                      }
+                    }}
+                    className={
+                      paginationParams.page === 1
+                        ? "opacity-50 cursor-not-allowed"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+                {renderPageNumbers()}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => {
+                      if (paginationParams.page < totalPages) {
+                        handlePaginationChange({
+                          page: Math.min(paginationParams.page + 1, totalPages),
+                        });
+                      }
+                    }}
+                    className={
+                      paginationParams.page === totalPages
+                        ? "opacity-50 cursor-not-allowed"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="px-8 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex justify-between items-center text-sm text-gray-600">
+              <p>
+                {t("pagination.showing", {
+                  start:
+                    (paginationParams.page - 1) * paginationParams.pageSize + 1,
+                  end: Math.min(
+                    paginationParams.page * paginationParams.pageSize,
+                    totalCount
+                  ),
+                  total: totalCount,
+                })}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
