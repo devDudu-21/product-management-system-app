@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -17,7 +17,7 @@ export function AddProductForm({ onAdd, disabled }: AddProductFormProps) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState<number>(0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onAdd(name, price);
     setName("");
