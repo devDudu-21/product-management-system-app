@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime" 
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"wails-app/core"
 )
 
@@ -27,7 +28,7 @@ func (a *App) startup(ctx context.Context) {
 	// Perform your setup here
 	a.ctx = ctx
 	a.productService = core.NewProductService()
-	a.productService.SetContext(ctx) 
+	a.productService.SetContext(ctx)
 
 	maxRetries := 3
 	retryDelay := time.Second * 2
@@ -37,26 +38,32 @@ func (a *App) startup(ctx context.Context) {
 		if err == nil {
 			a.dbHealthy = true
 			a.dbError = ""
-			runtime.LogInfo(a.ctx, fmt.Sprintf("Database initialized successfully on attempt %d", attempt)) 
+			runtime.LogInfo(a.ctx, fmt.Sprintf("Database initialized successfully on attempt %d", attempt))
 			return
 		}
 
-		runtime.LogWarning(a.ctx, fmt.Sprintf("Database initialization attempt %d/%d failed: %v", attempt, maxRetries, err)) 
+		runtime.LogError(a.ctx, fmt.Sprintf("Database initialization attempt %d/%d failed: %v", attempt, maxRetries, err))
 		a.dbHealthy = false
 		a.dbError = fmt.Sprintf("Database initialization failed: %v", err)
 
 		if attempt < maxRetries {
-			runtime.LogInfo(a.ctx, fmt.Sprintf("Waiting %v before next attempt...", retryDelay)) 
+			runtime.LogInfo(a.ctx, fmt.Sprintf("Waiting %v before next attempt...", retryDelay))
 			time.Sleep(retryDelay)
 		}
 	}
 
-	runtime.LogFatal(a.ctx, fmt.Sprintf("CRITICAL ERROR: Could not initialize database after %d attempts", maxRetries)) 
-	runtime.LogWarning(a.ctx, "Application will continue, but database operations will be unavailable") 
+	runtime.LogFatal(a.ctx, fmt.Sprintf("CRITICAL ERROR: Could not initialize database after %d attempts", maxRetries))
+	runtime.LogWarning(a.ctx, "Application will continue, but database operations will be unavailable")
+}
+
+func (a *App) onSecondInstanceLaunch(secondInstanceData options.SecondInstanceData) {
+	runtime.WindowUnminimise(a.ctx)
+	runtime.Show(a.ctx)
+	go runtime.EventsEmit(a.ctx, "launchArgs", secondInstanceData.Args)
 }
 
 // domReady is called after front-end resources have been loaded
-func (a App) domReady(ctx context.Context) {
+func (a *App) domReady(ctx context.Context) {
 	// Add your action here
 }
 
@@ -95,7 +102,7 @@ func (a *App) RetryDatabaseConnection() map[string]interface{} {
 	if err != nil {
 		a.dbHealthy = false
 		a.dbError = fmt.Sprintf("Reconnection failed: %v", err)
-		runtime.LogError(a.ctx, fmt.Sprintf("Reconnection failed: %v", err)) 
+		runtime.LogError(a.ctx, fmt.Sprintf("Reconnection failed: %v", err))
 		return map[string]interface{}{
 			"success": false,
 			"error":   a.dbError,
@@ -104,7 +111,7 @@ func (a *App) RetryDatabaseConnection() map[string]interface{} {
 
 	a.dbHealthy = true
 	a.dbError = ""
-	runtime.LogInfo(a.ctx, "Database reconnection successful!") 
+	runtime.LogInfo(a.ctx, "Database reconnection successful!")
 	return map[string]interface{}{
 		"success": true,
 		"message": "Database connection restored successfully",
@@ -138,7 +145,7 @@ func (a *App) GetProduct(id int) (*core.Product, error) {
 
 func (a *App) GetAllProducts() ([]*core.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
-		runtime.LogError(a.ctx, fmt.Sprintf("GetAllProducts failed: %v", err)) 
+		runtime.LogError(a.ctx, fmt.Sprintf("GetAllProducts failed: %v", err))
 		return nil, err
 	}
 	return a.productService.GetAllProducts()
@@ -146,7 +153,7 @@ func (a *App) GetAllProducts() ([]*core.Product, error) {
 
 func (a *App) UpdateProduct(id int, name string, price float64) (*core.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
-		runtime.LogError(a.ctx, fmt.Sprintf("UpdateProduct failed: %v", err)) 
+		runtime.LogError(a.ctx, fmt.Sprintf("UpdateProduct failed: %v", err))
 		return nil, err
 	}
 	return a.productService.UpdateProduct(id, name, price)
@@ -154,7 +161,7 @@ func (a *App) UpdateProduct(id int, name string, price float64) (*core.Product, 
 
 func (a *App) DeleteProduct(id int) error {
 	if err := a.checkDatabaseHealth(); err != nil {
-		runtime.LogError(a.ctx, fmt.Sprintf("DeleteProduct failed: %v", err)) 
+		runtime.LogError(a.ctx, fmt.Sprintf("DeleteProduct failed: %v", err))
 		return err
 	}
 	return a.productService.DeleteProduct(id)
