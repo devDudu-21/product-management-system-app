@@ -202,9 +202,9 @@ export function ProductList() {
               />
             </div>
           )}
-          {totalPages > 1 && (
+          {totalPages > 0 && (
             <div className="px-8 py-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex justify-between items-center text-sm text-gray-600">
+              <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600 gap-2 md:gap-0">
                 <p>
                   {t("pagination.showing", {
                     start:
@@ -217,6 +217,28 @@ export function ProductList() {
                     total: totalCount,
                   })}
                 </p>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="pageSize" className="ml-2">
+                    {t("pagination.itemsPerPage", "Itens por página:")}
+                  </label>
+                  <select
+                    id="pageSize"
+                    className="border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    value={paginationParams.pageSize}
+                    onChange={e =>
+                      setPaginationParams({
+                        pageSize: Number(e.target.value),
+                        page: 1,
+                      })
+                    }
+                  >
+                    {[5, 10, 20, 50, 100].map(size => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           )}

@@ -57,6 +57,7 @@
   },
   "pagination": {
     "showing": "Mostrando {{start}} a {{end}} de {{total}} resultados",
-    "pageOf": "Página {{current}} de {{total}}"
+    "pageOf": "Página {{current}} de {{total}}",
+    "itemsPerPage": "Itens por página:"
   }
 }
