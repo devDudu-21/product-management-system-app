@@ -17,7 +17,7 @@ export function AddProductForm({ onAdd, disabled }: AddProductFormProps) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState<number>(0);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     onAdd(name, price);
     setName("");
