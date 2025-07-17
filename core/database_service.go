@@ -29,7 +29,13 @@ func (d *DatabaseService) InitDatabase() error {
 	CREATE TABLE IF NOT EXISTS products (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
-		price REAL NOT NULL
+		price REAL NOT NULL,
+		category TEXT,
+		stock INTEGER DEFAULT 0,
+		description TEXT,
+		image_url TEXT,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP
 	);`
 
 	_, err = d.DB.Exec(createTableSQL)

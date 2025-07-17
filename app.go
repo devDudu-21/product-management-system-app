@@ -130,12 +130,12 @@ func (a *App) checkDatabaseHealth() error {
 }
 
 // CRUD methods to interact with ProductService
-func (a *App) CreateProduct(name string, price float64) (*models.Product, error) {
+func (a *App) CreateProduct(createProductDTO dto.CreateProductDTO) (*models.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("CreateProduct failed: %v", err))
 		return nil, err
 	}
-	return a.productService.CreateProduct(name, price)
+	return a.productService.CreateProduct(createProductDTO)
 }
 
 func (a *App) GetProduct(id int) (*models.Product, error) {
@@ -146,7 +146,7 @@ func (a *App) GetProduct(id int) (*models.Product, error) {
 	return a.productService.GetProductByID(id)
 }
 
-func (a *App) GetAllProducts(params pagination_dto.PaginationDTO) (*pagination_dto.PaginationResponse, error) {
+func (a *App) GetAllProducts(params dto.PaginationDTO) (*dto.PaginationResponse, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("GetAllProducts failed: %v", err))
 		return nil, err

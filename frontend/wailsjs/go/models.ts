@@ -1,38 +1,27 @@
-export namespace models {
+export namespace dto {
 	
-	export class Product {
-	    id: number;
+	export class CreateProductDTO {
 	    name: string;
 	    price: number;
-	    category: string;
-	    stock: number;
+	    category?: string;
+	    stock?: number;
 	    description?: string;
 	    imageUrl?: string;
-	    createdAt: string;
-	    updatedAt?: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new Product(source);
+	        return new CreateProductDTO(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.price = source["price"];
 	        this.category = source["category"];
 	        this.stock = source["stock"];
 	        this.description = source["description"];
 	        this.imageUrl = source["imageUrl"];
-	        this.createdAt = source["createdAt"];
-	        this.updatedAt = source["updatedAt"];
 	    }
 	}
-
-}
-
-export namespace pagination_dto {
-	
 	export class PaginationDTO {
 	    page: number;
 	    pageSize: number;
@@ -90,6 +79,39 @@ export namespace pagination_dto {
 		    }
 		    return a;
 		}
+	}
+
+}
+
+export namespace models {
+	
+	export class Product {
+	    id: number;
+	    name: string;
+	    price: number;
+	    category?: string;
+	    stock: number;
+	    description?: string;
+	    imageUrl?: string;
+	    createdAt: string;
+	    updatedAt?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Product(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.price = source["price"];
+	        this.category = source["category"];
+	        this.stock = source["stock"];
+	        this.description = source["description"];
+	        this.imageUrl = source["imageUrl"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
+	    }
 	}
 
 }

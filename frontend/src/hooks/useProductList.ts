@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { models } from "wailsjs/go/models";
+import { models, dto } from "wailsjs/go/models";
 import {
   CreateProduct,
   GetAllProducts,
@@ -8,6 +8,7 @@ import {
 } from "../../wailsjs/go/main/App";
 
 export type Product = models.Product;
+export type CreateProductDTO = dto.CreateProductDTO;
 
 export interface PaginationParams {
   page: number;
@@ -49,11 +50,11 @@ export function useProductList(initialParams: PaginationParams) {
     []
   );
 
-  const handleCreateProduct = async (name: string, price: number) => {
-    if (name && price > 0) {
+  const handleCreateProduct = async (productData: CreateProductDTO) => {
+    if (productData.name && productData.price > 0) {
       try {
         setError("");
-        await CreateProduct(name, price);
+        await CreateProduct(productData);
         setPaginationParams(prev => ({ ...prev, page: 1 }));
         loadProducts();
       } catch (error) {

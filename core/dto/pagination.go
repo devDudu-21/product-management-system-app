@@ -1,4 +1,4 @@
-package pagination_dto
+package dto
 
 import (
 	"product-management-app/core/models"
@@ -14,8 +14,8 @@ type PaginationDTO struct {
 
 type PaginationResponse struct {
 	Products   []*models.Product `json:"products"`
-	TotalCount int              `json:"totalCount"`
-	TotalPages int              `json:"totalPages"`
-	Page       int              `json:"page"`
-	PageSize   int              `json:"pageSize"`
+	TotalCount int               `json:"totalCount"`
+	TotalPages int               `json:"totalPages"`
+	Page       int               `json:"page"`
+	PageSize   int               `json:"pageSize"`
 }

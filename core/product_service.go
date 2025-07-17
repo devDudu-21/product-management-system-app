@@ -30,7 +30,7 @@ func (s *ProductService) InitDatabase() error {
 	if err := s.db.InitDatabase(); err != nil {
 		return err
 	}
-	s.repo = repositories.NewProductRepository(s.db.DB)
+	s.repo = repositories.NewProductRepository(s.db.DB, s.ctx)
 	return nil
 }
 
@@ -40,8 +40,8 @@ func (s *ProductService) CloseDatabase() {
 	}
 }
 
-func (s *ProductService) CreateProduct(name string, price float64) (*models.Product, error) {
-	product, err := s.repo.Create(name, price)
+func (s *ProductService) CreateProduct(createProductDTO dto.CreateProductDTO) (*models.Product, error) {
+	product, err := s.repo.Create(createProductDTO)
 	if err != nil {
 		runtime.LogError(s.ctx, fmt.Sprintf("Failed to create product: %v", err))
 		return nil, err
@@ -60,7 +60,7 @@ func (s *ProductService) GetProductByID(id int) (*models.Product, error) {
 	return product, nil
 }
 
-func (s *ProductService) GetAllProducts(params pagination_dto.PaginationDTO) (*pagination_dto.PaginationResponse, error) {
+func (s *ProductService) GetAllProducts(params dto.PaginationDTO) (*dto.PaginationResponse, error) {
 	response, err := s.repo.GetAll(params)
 	if err != nil {
 		runtime.LogError(s.ctx, fmt.Sprintf("Failed to fetch products: %v", err))
