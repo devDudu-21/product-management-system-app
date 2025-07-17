@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { core } from "wailsjs/go/models";
+import { models } from "wailsjs/go/models";
 import {
   CreateProduct,
   GetAllProducts,
@@ -7,7 +7,7 @@ import {
   DeleteProduct,
 } from "../../wailsjs/go/main/App";
 
-export type Product = core.Product;
+export type Product = models.Product;
 
 export interface PaginationParams {
   page: number;

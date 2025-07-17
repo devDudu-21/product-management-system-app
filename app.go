@@ -7,6 +7,7 @@ import (
 
 	"product-management-app/core"
 	"product-management-app/core/dto"
+	"product-management-app/core/models"
 
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -129,7 +130,7 @@ func (a *App) checkDatabaseHealth() error {
 }
 
 // CRUD methods to interact with ProductService
-func (a *App) CreateProduct(name string, price float64) (*core.Product, error) {
+func (a *App) CreateProduct(name string, price float64) (*models.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("CreateProduct failed: %v", err))
 		return nil, err
@@ -137,7 +138,7 @@ func (a *App) CreateProduct(name string, price float64) (*core.Product, error) {
 	return a.productService.CreateProduct(name, price)
 }
 
-func (a *App) GetProduct(id int) (*core.Product, error) {
+func (a *App) GetProduct(id int) (*models.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("GetProduct failed: %v", err))
 		return nil, err
@@ -145,7 +146,7 @@ func (a *App) GetProduct(id int) (*core.Product, error) {
 	return a.productService.GetProductByID(id)
 }
 
-func (a *App) GetAllProducts(params pagination_dto.PaginationDTO) (*core.PaginationResponse, error) {
+func (a *App) GetAllProducts(params pagination_dto.PaginationDTO) (*pagination_dto.PaginationResponse, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("GetAllProducts failed: %v", err))
 		return nil, err
@@ -153,7 +154,7 @@ func (a *App) GetAllProducts(params pagination_dto.PaginationDTO) (*core.Paginat
 	return a.productService.GetAllProducts(params)
 }
 
-func (a *App) UpdateProduct(id int, name string, price float64) (*core.Product, error) {
+func (a *App) UpdateProduct(id int, name string, price float64) (*models.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("UpdateProduct failed: %v", err))
 		return nil, err
