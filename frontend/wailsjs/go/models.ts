@@ -22,6 +22,60 @@ export namespace dto {
 	        this.imageUrl = source["imageUrl"];
 	    }
 	}
+	export class ImportError {
+	    row: number;
+	    field: string;
+	    message: string;
+	    value: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ImportError(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.row = source["row"];
+	        this.field = source["field"];
+	        this.message = source["message"];
+	        this.value = source["value"];
+	    }
+	}
+	export class ImportResult {
+	    successCount: number;
+	    errorCount: number;
+	    errors?: ImportError[];
+	    importedItems?: models.Product[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ImportResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.successCount = source["successCount"];
+	        this.errorCount = source["errorCount"];
+	        this.errors = this.convertValues(source["errors"], ImportError);
+	        this.importedItems = this.convertValues(source["importedItems"], models.Product);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class PaginationDTO {
 	    page: number;
 	    pageSize: number;

@@ -10,6 +10,14 @@ export function DeleteProduct(arg1) {
   return window['go']['main']['App']['DeleteProduct'](arg1);
 }
 
+export function ExportProductsToCSV(arg1, arg2) {
+  return window['go']['main']['App']['ExportProductsToCSV'](arg1, arg2);
+}
+
+export function ExportProductsToXLSX(arg1, arg2) {
+  return window['go']['main']['App']['ExportProductsToXLSX'](arg1, arg2);
+}
+
 export function GetAllProducts(arg1) {
   return window['go']['main']['App']['GetAllProducts'](arg1);
 }
@@ -18,12 +26,24 @@ export function GetDatabaseStatus() {
   return window['go']['main']['App']['GetDatabaseStatus']();
 }
 
+export function GetImportTemplate() {
+  return window['go']['main']['App']['GetImportTemplate']();
+}
+
 export function GetProduct(arg1) {
   return window['go']['main']['App']['GetProduct'](arg1);
 }
 
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
+}
+
+export function ImportProductsFromCSV(arg1) {
+  return window['go']['main']['App']['ImportProductsFromCSV'](arg1);
+}
+
+export function ImportProductsFromXLSX(arg1) {
+  return window['go']['main']['App']['ImportProductsFromXLSX'](arg1);
 }
 
 export function RetryDatabaseConnection() {

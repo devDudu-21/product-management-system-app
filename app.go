@@ -169,3 +169,66 @@ func (a *App) DeleteProduct(id int) error {
 	}
 	return a.productService.DeleteProduct(id)
 }
+
+// Métodos de Importação e Exportação
+
+// ExportProductsToCSV exporta produtos para CSV e retorna o conteúdo como base64
+func (a *App) ExportProductsToCSV(includeAll bool, productIDs []int) (string, error) {
+	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("ExportProductsToCSV failed: %v", err))
+		return "", err
+	}
+	
+	data, err := a.productService.ExportProductsToCSV(includeAll, productIDs)
+	if err != nil {
+		return "", err
+	}
+	
+	// Para facilitar o transporte, retornamos como string (o frontend pode converter)
+	return string(data), nil
+}
+
+// ExportProductsToXLSX exporta produtos para XLSX e retorna os dados em base64
+func (a *App) ExportProductsToXLSX(includeAll bool, productIDs []int) (string, error) {
+	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("ExportProductsToXLSX failed: %v", err))
+		return "", err
+	}
+	
+	data, err := a.productService.ExportProductsToXLSX(includeAll, productIDs)
+	if err != nil {
+		return "", err
+	}
+	
+	// Retorna os dados como string (o frontend pode lidar com o download)
+	return string(data), nil
+}
+
+// ImportProductsFromCSV importa produtos de dados CSV fornecidos como string
+func (a *App) ImportProductsFromCSV(csvData string) (*dto.ImportResult, error) {
+	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("ImportProductsFromCSV failed: %v", err))
+		return nil, err
+	}
+	
+	return a.productService.ImportProductsFromCSV([]byte(csvData))
+}
+
+// ImportProductsFromXLSX importa produtos de dados XLSX fornecidos como string
+func (a *App) ImportProductsFromXLSX(xlsxData string) (*dto.ImportResult, error) {
+	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("ImportProductsFromXLSX failed: %v", err))
+		return nil, err
+	}
+	
+	return a.productService.ImportProductsFromXLSX([]byte(xlsxData))
+}
+
+// GetImportTemplate retorna um template CSV para importação
+func (a *App) GetImportTemplate() string {
+	template := "Nome,Preço,Categoria,Estoque,Descrição,URL da Imagem\n"
+	template += "Produto Exemplo,29.99,Eletrônicos,10,Descrição do produto exemplo,https://exemplo.com/imagem.jpg\n"
+	template += "Outro Produto,49.90,Casa e Jardim,5,Outro exemplo de produto,\n"
+	
+	return template
+}
