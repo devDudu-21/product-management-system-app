@@ -5,9 +5,9 @@
 [![React](https://img.shields.io/badge/React-18.2.0-61DAFB?style=flat-square&logo=react)](https://reactjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0.2-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.1.8-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com)
-[![CI](https://github.com/devDudu-21/product-management-system-app/workflows/CI/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/ci.yml)
-[![Release](https://github.com/devDudu-21/product-management-system-app/workflows/Release/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/release.yml)
-[![License](https://img.shields.io/github/license/devDudu-21/product-management-system-app?style=flat-square)](LICENSE)
+[![CI](https://github.com/devDudu-21/product-management-app/workflows/CI/badge.svg)](https://github.com/devDudu-21/product-management-app/actions/workflows/ci.yml)
+[![Release](https://github.com/devDudu-21/product-management-app/workflows/Release/badge.svg)](https://github.com/devDudu-21/product-management-app/actions/workflows/release.yml)
+[![License](https://img.shields.io/github/license/devDudu-21/product-management-app?style=flat-square)](LICENSE)
 
 A modern and efficient product management system built with Wails, offering a native desktop experience with modern web technologies.
 
@@ -57,7 +57,7 @@ go install github.com/wailsapp/wails/v2/cmd/wails@latest
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/devDudu-21/product-management-system-app
+git clone https://github.com/devDudu-21/product-management-app
 cd product-management-app
 ```
 
@@ -121,12 +121,12 @@ This project includes a comprehensive CI/CD pipeline with multiple automated wor
 
 ### 🚦 Workflows Overview
 
-| Workflow           | Trigger                 | Purpose                      | Status                                                                                                                                                                                                       |
-| ------------------ | ----------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- |
-| **CI**             | Push/PR to main/develop | Continuous Integration       | [![CI](https://github.com/devDudu-21/product-management-system-app/workflows/CI/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/ci.yml)                            |     |
-| **Build & Test**   | Schedule/Manual         | Multi-platform build testing | [![Build](https://github.com/devDudu-21/product-management-system-app/workflows/Build%20and%20Test/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/build-test.yml) |
-| **Release**        | Tags/Manual             | Automated releases           | [![Release](https://github.com/devDudu-21/product-management-system-app/workflows/Release/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/release.yml)             |
-| **Staging Deploy** | Push to develop         | Deploy to staging            | [![Staging](https://github.com/devDudu-21/product-management-system-app/workflows/Deploy%20Staging/badge.svg)](https://github.com/devDudu-21/product-management-system-app/actions/workflows/staging.yml)    |
+| Workflow           | Trigger                 | Purpose                      | Status                                                                                                                                                                                         |
+| ------------------ | ----------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| **CI**             | Push/PR to main/develop | Continuous Integration       | [![CI](https://github.com/devDudu-21/product-management-app/workflows/CI/badge.svg)](https://github.com/devDudu-21/product-management-app/actions/workflows/ci.yml)                            |     |
+| **Build & Test**   | Schedule/Manual         | Multi-platform build testing | [![Build](https://github.com/devDudu-21/product-management-app/workflows/Build%20and%20Test/badge.svg)](https://github.com/devDudu-21/product-management-app/actions/workflows/build-test.yml) |
+| **Release**        | Tags/Manual             | Automated releases           | [![Release](https://github.com/devDudu-21/product-management-app/workflows/Release/badge.svg)](https://github.com/devDudu-21/product-management-app/actions/workflows/release.yml)             |
+| **Staging Deploy** | Push to develop         | Deploy to staging            | [![Staging](https://github.com/devDudu-21/product-management-app/workflows/Deploy%20Staging/badge.svg)](https://github.com/devDudu-21/product-management-app/actions/workflows/staging.yml)    |
 
 ### 🎯 CI Workflow Features
 
