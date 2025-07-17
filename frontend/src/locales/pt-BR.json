@@ -21,13 +21,21 @@
     "sortBy": "Ordenar por",
     "sortById": "Ordenar por ID",
     "sortByName": "Ordenar por Nome",
-    "sortByPrice": "Ordenar por Preço"
+    "sortByPrice": "Ordenar por Preço",
+    "category": "Categoria",
+    "stock": "Estoque",
+    "description": "Descrição",
+    "createdAt": "Data de Criação",
+    "updatedAt": "Data de Atualização",
+    "imageUrl": "Imagem do Produto"
   },
   "actions": {
     "edit": "Editar",
     "delete": "Deletar",
     "save": "Salvar Alterações",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "viewDetails": "Ver Detalhes",
+    "hideDetails": "Ocultar Detalhes"
   },
   "dialog": {
     "editProduct": "Editar Produto",

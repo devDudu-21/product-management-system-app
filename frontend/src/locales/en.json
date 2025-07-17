@@ -21,13 +21,21 @@
     "sortBy": "Sort by",
     "sortById": "Sort by ID",
     "sortByName": "Sort by Name",
-    "sortByPrice": "Sort by Price"
+    "sortByPrice": "Sort by Price",
+    "category": "Category",
+    "stock": "Stock",
+    "description": "Description",
+    "createdAt": "Created Date",
+    "updatedAt": "Updated Date",
+    "imageUrl": "Product Image"
   },
   "actions": {
     "edit": "Edit",
     "delete": "Delete",
     "save": "Save Changes",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "viewDetails": "View Details",
+    "hideDetails": "Hide Details"
   },
   "dialog": {
     "editProduct": "Edit Product",
