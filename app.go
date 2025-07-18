@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"time"
 
-	"product-management-app/core"
 	"product-management-app/core/dto"
 	"product-management-app/core/models"
+	service "product-management-app/core/services"
 
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -17,7 +18,7 @@ import (
 // App struct
 type App struct {
 	ctx            context.Context
-	productService *core.ProductService
+	productService *service.ProductService
 	dbHealthy      bool
 	dbError        string
 }
@@ -31,7 +32,7 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	// Perform your setup here
 	a.ctx = ctx
-	a.productService = core.NewProductService()
+	a.productService = service.NewProductService()
 	a.productService.SetContext(ctx)
 
 	maxRetries := 3
@@ -214,14 +215,20 @@ func (a *App) ImportProductsFromXLSX(xlsxData string) (*dto.ImportResult, error)
 		runtime.LogError(a.ctx, fmt.Sprintf("ImportProductsFromXLSX failed: %v", err))
 		return nil, err
 	}
+
+	data, err := base64.StdEncoding.DecodeString(xlsxData)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("Failed to decode XLSX base64 data: %v", err))
+		return nil, fmt.Errorf("invalid XLSX data format: %v", err)
+	}
 	
-	return a.productService.ImportProductsFromXLSX([]byte(xlsxData))
+	return a.productService.ImportProductsFromXLSX(data)
 }
 
 func (a *App) GetImportTemplate() string {
-	template := "Nome,Preço,Categoria,Estoque,Descrição,URL da Imagem\n"
-	template += "Produto Exemplo,29.99,Eletrônicos,10,Descrição do produto exemplo,https://exemplo.com/imagem.jpg\n"
-	template += "Outro Produto,49.90,Casa e Jardim,5,Outro exemplo de produto,\n"
+	template := "Name,Price,Category,Stock,Description,Image URL\n"
+	template += "Example Product,29.99,Electronics,10,Example product description,https://example.com/image.jpg\n"
+	template += "Another Product,49.90,Home & Garden,5,Another example product,\n"
 	
 	return template
 }
@@ -238,13 +245,13 @@ func (a *App) SaveExportedCSV(includeAll bool, productIDs []int) error {
 		return err
 	}
 
-	filename := fmt.Sprintf("produtos_%s.csv", time.Now().Format("2006-01-02"))
+	filename := fmt.Sprintf("products_%s.csv", time.Now().Format("2006-01-02"))
 	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
-		Title:           "Salvar Exportação CSV",
+		Title:           "Save CSV Export",
 		DefaultFilename: filename,
 		Filters: []runtime.FileFilter{
 			{
-				DisplayName: "Arquivos CSV (*.csv)",
+				DisplayName: "CSV Files (*.csv)",
 				Pattern:     "*.csv",
 			},
 		},
@@ -256,16 +263,16 @@ func (a *App) SaveExportedCSV(includeAll bool, productIDs []int) error {
 	}
 
 	if filePath == "" {
-		return fmt.Errorf("operação cancelada pelo usuário")
+		return fmt.Errorf("operation cancelled by user")
 	}
 
 	err = os.WriteFile(filePath, data, 0644)
 	if err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedCSV write error: %v", err))
-		return fmt.Errorf("erro ao salvar arquivo: %v", err)
+		return fmt.Errorf("error saving file: %v", err)
 	}
 
-	runtime.LogInfo(a.ctx, fmt.Sprintf("CSV exportado com sucesso para: %s", filePath))
+	runtime.LogInfo(a.ctx, fmt.Sprintf("CSV exported successfully to: %s", filePath))
 	return nil
 }
 
@@ -281,13 +288,13 @@ func (a *App) SaveExportedXLSX(includeAll bool, productIDs []int) error {
 		return err
 	}
 
-	filename := fmt.Sprintf("produtos_%s.xlsx", time.Now().Format("2006-01-02"))
+	filename := fmt.Sprintf("products_%s.xlsx", time.Now().Format("2006-01-02"))
 	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
-		Title:           "Salvar Exportação Excel",
+		Title:           "Save Excel Export",
 		DefaultFilename: filename,
 		Filters: []runtime.FileFilter{
 			{
-				DisplayName: "Arquivos Excel (*.xlsx)",
+				DisplayName: "Excel Files (*.xlsx)",
 				Pattern:     "*.xlsx",
 			},
 		},
@@ -299,16 +306,16 @@ func (a *App) SaveExportedXLSX(includeAll bool, productIDs []int) error {
 	}
 
 	if filePath == "" {
-		return fmt.Errorf("operação cancelada pelo usuário")
+		return fmt.Errorf("operation cancelled by user")
 	}
 
 	err = os.WriteFile(filePath, data, 0644)
 	if err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedXLSX write error: %v", err))
-		return fmt.Errorf("erro ao salvar arquivo: %v", err)
+		return fmt.Errorf("error saving file: %v", err)
 	}
 
-	runtime.LogInfo(a.ctx, fmt.Sprintf("XLSX exportado com sucesso para: %s", filePath))
+	runtime.LogInfo(a.ctx, fmt.Sprintf("XLSX exported successfully to: %s", filePath))
 	return nil
 }
 
@@ -316,11 +323,11 @@ func (a *App) SaveImportTemplate() error {
 	template := a.GetImportTemplate()
 
 	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
-		Title:           "Salvar Template de Importação",
-		DefaultFilename: "template_produtos.csv",
+		Title:           "Save Import Template",
+		DefaultFilename: "products_template.csv",
 		Filters: []runtime.FileFilter{
 			{
-				DisplayName: "Arquivos CSV (*.csv)",
+				DisplayName: "CSV Files (*.csv)",
 				Pattern:     "*.csv",
 			},
 		},
@@ -332,15 +339,15 @@ func (a *App) SaveImportTemplate() error {
 	}
 
 	if filePath == "" {
-		return fmt.Errorf("operação cancelada pelo usuário")
+		return fmt.Errorf("operation cancelled by user")
 	}
 
 	err = os.WriteFile(filePath, []byte(template), 0644)
 	if err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("SaveImportTemplate write error: %v", err))
-		return fmt.Errorf("erro ao salvar template: %v", err)
+		return fmt.Errorf("error saving template: %v", err)
 	}
 
-	runtime.LogInfo(a.ctx, fmt.Sprintf("Template salvo com sucesso em: %s", filePath))
+	runtime.LogInfo(a.ctx, fmt.Sprintf("Template saved successfully to: %s", filePath))
 	return nil
 }

@@ -1,4 +1,4 @@
-package core
+package service
 
 import (
 	"context"
@@ -93,9 +93,7 @@ func (s *ProductService) DeleteProduct(id int) error {
 	return nil
 }
 
-// Métodos de Importação e Exportação
 
-// ExportProductsToCSV exporta produtos para formato CSV
 func (s *ProductService) ExportProductsToCSV(includeAll bool, productIDs []int) ([]byte, error) {
 	request := dto.ExportRequest{
 		Format:     dto.FormatCSV,
@@ -113,7 +111,6 @@ func (s *ProductService) ExportProductsToCSV(includeAll bool, productIDs []int) 
 	return data, nil
 }
 
-// ExportProductsToXLSX exporta produtos para formato XLSX
 func (s *ProductService) ExportProductsToXLSX(includeAll bool, productIDs []int) ([]byte, error) {
 	request := dto.ExportRequest{
 		Format:     dto.FormatXLSX,
@@ -131,7 +128,6 @@ func (s *ProductService) ExportProductsToXLSX(includeAll bool, productIDs []int)
 	return data, nil
 }
 
-// ImportProductsFromCSV importa produtos de um arquivo CSV
 func (s *ProductService) ImportProductsFromCSV(data []byte) (*dto.ImportResult, error) {
 	result, err := s.importExportService.ImportFromCSV(data)
 	if err != nil {
@@ -143,7 +139,6 @@ func (s *ProductService) ImportProductsFromCSV(data []byte) (*dto.ImportResult, 
 	return result, nil
 }
 
-// ImportProductsFromXLSX importa produtos de um arquivo XLSX
 func (s *ProductService) ImportProductsFromXLSX(data []byte) (*dto.ImportResult, error) {
 	result, err := s.importExportService.ImportFromXLSX(data)
 	if err != nil {

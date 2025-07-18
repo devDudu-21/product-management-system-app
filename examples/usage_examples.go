@@ -7,29 +7,29 @@ import (
 
 
 func ExampleUsage() {
-	fmt.Println("=== EXEMPLOS DE USO DAS FUNCIONALIDADES ===")
+	fmt.Println("=== FUNCTIONALITY USAGE EXAMPLES ===")
 	fmt.Println()
 
-	fmt.Println("1. OBTER TEMPLATE DE IMPORTAÇÃO:")
-	fmt.Println("Frontend chama: window.go.main.App.GetImportTemplate()")
-	fmt.Println("Retorna:")
-	fmt.Println("Nome,Preço,Categoria,Estoque,Descrição,URL da Imagem")
-	fmt.Println("Produto Exemplo,29.99,Eletrônicos,10,Descrição do produto exemplo,https://exemplo.com/imagem.jpg")
+	fmt.Println("1. GET IMPORT TEMPLATE:")
+	fmt.Println("Frontend calls: window.go.main.App.GetImportTemplate()")
+	fmt.Println("Returns:")
+	fmt.Println("Name,Price,Category,Stock,Description,Image URL")
+	fmt.Println("Example Product,29.99,Electronics,10,Example product description,https://example.com/image.jpg")
 	fmt.Println()
 
-	fmt.Println("2. EXPORTAR TODOS OS PRODUTOS PARA CSV:")
-	fmt.Println("Frontend chama: window.go.main.App.ExportProductsToCSV(true, [])")
-	fmt.Println("Retorna string CSV que pode ser convertida em download")
+	fmt.Println("2. EXPORT ALL PRODUCTS TO CSV:")
+	fmt.Println("Frontend calls: window.go.main.App.ExportProductsToCSV(true, [])")
+	fmt.Println("Returns CSV string that can be converted to download")
 	fmt.Println()
 
-	fmt.Println("3. EXPORTAR PRODUTOS ESPECÍFICOS PARA XLSX:")
-	fmt.Println("Frontend chama: window.go.main.App.ExportProductsToXLSX(false, [1, 2, 3])")
-	fmt.Println("Retorna dados binários que podem ser convertidos em arquivo .xlsx")
+	fmt.Println("3. EXPORT SPECIFIC PRODUCTS TO XLSX:")
+	fmt.Println("Frontend calls: window.go.main.App.ExportProductsToXLSX(false, [1, 2, 3])")
+	fmt.Println("Returns binary data that can be converted to .xlsx file")
 	fmt.Println()
 
-	fmt.Println("4. IMPORTAR PRODUTOS DE CSV:")
-	fmt.Println("Frontend lê arquivo e chama: window.go.main.App.ImportProductsFromCSV(csvData)")
-	fmt.Println("Retorna resultado com sucessos, erros e detalhes:")
+	fmt.Println("4. IMPORT PRODUCTS FROM CSV:")
+	fmt.Println("Frontend reads file and calls: window.go.main.App.ImportProductsFromCSV(csvData)")
+	fmt.Println("Returns result with successes, errors and details:")
 	fmt.Println(`{
   "successCount": 2,
   "errorCount": 1,
@@ -37,28 +37,29 @@ func ExampleUsage() {
     {
       "row": 3,
       "field": "price",
-      "message": "Preço deve ser um número válido",
+      "message": "Price must be a valid number",
       "value": "ABC"
     }
   ],
   "importedItems": [
-    // produtos criados com sucesso
+    // successfully created products
   ]
 }`)
 	fmt.Println()
 
-	fmt.Println("5. FORMATO DE DADOS CSV ESPERADO:")
-	fmt.Println(`Nome,Preço,Categoria,Estoque,Descrição,URL da Imagem
-Smartphone Samsung,899.99,Eletrônicos,50,Smartphone com 128GB,https://exemplo.com/samsung.jpg
-Notebook Dell,2499.90,Informática,10,Notebook Dell Inspiron 15,https://exemplo.com/dell.jpg
-Cadeira Gamer,549.00,Móveis,25,Cadeira gamer ergonômica,
-Mouse Sem Fio,89.90,Acessórios,100,Mouse óptico sem fio,`)
+	fmt.Println("5. EXPECTED CSV DATA FORMAT:")
+	fmt.Println(`Name,Price,Category,Stock,Description,Image URL
+Samsung Smartphone,899.99,Electronics,50,Smartphone with 128GB,https://example.com/samsung.jpg
+Dell Notebook,2499.90,Computers,10,Dell Inspiron 15 Notebook,https://example.com/dell.jpg
+Gaming Chair,549.00,Furniture,25,Ergonomic gaming chair,
+Wireless Mouse,89.90,Accessories,100,Optical wireless mouse,`)
 	fmt.Println()
 
-	fmt.Println("=== BACKEND PRONTO PARA INTEGRAÇÃO ===")
+	fmt.Println("=== BACKEND READY FOR INTEGRATION ===")
 }
 
+
 func main() {
-	log.Println("Demonstração das funcionalidades de importação e exportação")
+	log.Println("Demonstration of import and export functionalities")
 	ExampleUsage()
 }

@@ -142,13 +142,13 @@ export function ImportExportActions({
         "../../../wailsjs/go/main/App"
       );
 
-      const fileContent = await readFileAsText(selectedFile);
-
       let result: ImportResultData;
 
       if (selectedFile.name.endsWith(".csv")) {
+        const fileContent = await readFileAsText(selectedFile);
         result = await ImportProductsFromCSV(fileContent);
       } else {
+        const fileContent = await readFileAsBase64(selectedFile);
         result = await ImportProductsFromXLSX(fileContent);
       }
 
@@ -165,9 +165,10 @@ export function ImportExportActions({
         onImportSuccess();
       }
     } catch (error) {
+      console.error("Import error:", error);
       setImportResult({
         success: false,
-        message: `Erro durante importação: ${error}`,
+        message: `Import error: ${error}`,
       });
     } finally {
       setIsImporting(false);
@@ -180,6 +181,20 @@ export function ImportExportActions({
       reader.onload = e => resolve(e.target?.result as string);
       reader.onerror = reject;
       reader.readAsText(file);
+    });
+  };
+
+  const readFileAsBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const result = e.target?.result as string;
+        // Remove the data URL prefix to get just the base64 content
+        const base64 = result.split(",")[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
     });
   };
 

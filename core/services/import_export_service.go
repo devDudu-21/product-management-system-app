@@ -1,4 +1,4 @@
-package core
+package service
 
 import (
 	"bytes"
@@ -37,7 +37,7 @@ func (s *ImportExportService) ExportToCSV(request dto.ExportRequest) ([]byte, er
 	var buf bytes.Buffer
 	writer := csv.NewWriter(&buf)
 
-	headers := []string{"ID", "Nome", "Preço", "Categoria", "Estoque", "Descrição", "URL da Imagem", "Criado em", "Atualizado em"}
+	headers := []string{"ID", "Name", "Price", "Category", "Stock", "Description", "Image URL", "Created At", "Updated At"}
 	if err := writer.Write(headers); err != nil {
 		return nil, fmt.Errorf("failed to write CSV header: %w", err)
 	}
@@ -82,13 +82,13 @@ func (s *ImportExportService) ExportToXLSX(request dto.ExportRequest) ([]byte, e
 		}
 	}()
 
-	sheetName := "Produtos"
+	sheetName := "Products"
 	index, err := f.NewSheet(sheetName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create sheet: %w", err)
 	}
 
-	headers := []string{"ID", "Nome", "Preço", "Categoria", "Estoque", "Descrição", "URL da Imagem", "Criado em", "Atualizado em"}
+	headers := []string{"ID", "Name", "Price", "Category", "Stock", "Description", "Image URL", "Created At", "Updated At"}
 	for i, header := range headers {
 		cell := fmt.Sprintf("%s1", string(rune('A'+i)))
 		f.SetCellValue(sheetName, cell, header)
@@ -158,7 +158,7 @@ func (s *ImportExportService) ImportFromCSV(data []byte) (*dto.ImportResult, err
 		if err != nil {
 			result.Errors = append(result.Errors, dto.ImportError{
 				Row:     rowNum,
-				Message: fmt.Sprintf("Erro ao criar produto: %v", err),
+				Message: fmt.Sprintf("Error creating product: %v", err),
 			})
 			result.ErrorCount++
 			continue
@@ -173,9 +173,30 @@ func (s *ImportExportService) ImportFromCSV(data []byte) (*dto.ImportResult, err
 }
 
 func (s *ImportExportService) ImportFromXLSX(data []byte) (*dto.ImportResult, error) {
+	// Validate the data before attempting to open
+	if len(data) == 0 {
+		return &dto.ImportResult{
+			SuccessCount: 0,
+			ErrorCount:   1,
+			Errors: []dto.ImportError{
+				{Row: 0, Message: "Empty file data provided"},
+			},
+		}, nil
+	}
+
+	// Log the first few bytes for debugging
+	runtime.LogInfo(s.ctx, fmt.Sprintf("Opening XLSX file, size: %d bytes", len(data)))
+	
 	f, err := excelize.OpenReader(bytes.NewReader(data))
 	if err != nil {
-		return nil, fmt.Errorf("failed to open XLSX: %w", err)
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to open XLSX: %v", err))
+		return &dto.ImportResult{
+			SuccessCount: 0,
+			ErrorCount:   1,
+			Errors: []dto.ImportError{
+				{Row: 0, Message: fmt.Sprintf("Invalid XLSX file format: %v", err)},
+			},
+		}, nil
 	}
 	defer func() {
 		if err := f.Close(); err != nil {
@@ -189,7 +210,7 @@ func (s *ImportExportService) ImportFromXLSX(data []byte) (*dto.ImportResult, er
 			SuccessCount: 0,
 			ErrorCount:   1,
 			Errors: []dto.ImportError{
-				{Row: 0, Message: "Arquivo XLSX não contém planilhas"},
+				{Row: 0, Message: "XLSX file contains no sheets"},
 			},
 		}, nil
 	}
@@ -205,7 +226,7 @@ func (s *ImportExportService) ImportFromXLSX(data []byte) (*dto.ImportResult, er
 			SuccessCount: 0,
 			ErrorCount:   1,
 			Errors: []dto.ImportError{
-				{Row: 0, Message: "Arquivo XLSX está vazio ou contém apenas cabeçalhos"},
+				{Row: 0, Message: "XLSX file is empty or contains only headers"},
 			},
 		}, nil
 	}
@@ -230,7 +251,7 @@ func (s *ImportExportService) ImportFromXLSX(data []byte) (*dto.ImportResult, er
 		if err != nil {
 			result.Errors = append(result.Errors, dto.ImportError{
 				Row:     rowNum,
-				Message: fmt.Sprintf("Erro ao criar produto: %v", err),
+				Message: fmt.Sprintf("Error creating product: %v", err),
 			})
 			result.ErrorCount++
 			continue
@@ -273,7 +294,7 @@ func (s *ImportExportService) parseCSVRecord(record []string, rowNum int) (*dto.
 	if len(record) < 6 {
 		errors = append(errors, dto.ImportError{
 			Row:     rowNum,
-			Message: "Registro incompleto, esperado pelo menos 6 campos",
+			Message: "Incomplete record, expected at least 6 fields",
 		})
 		return nil, errors
 	}
@@ -283,7 +304,7 @@ func (s *ImportExportService) parseCSVRecord(record []string, rowNum int) (*dto.
 		errors = append(errors, dto.ImportError{
 			Row:     rowNum,
 			Field:   "name",
-			Message: "Nome é obrigatório",
+			Message: "Name is required",
 			Value:   record[0],
 		})
 	}
@@ -293,14 +314,14 @@ func (s *ImportExportService) parseCSVRecord(record []string, rowNum int) (*dto.
 		errors = append(errors, dto.ImportError{
 			Row:     rowNum,
 			Field:   "price",
-			Message: "Preço deve ser um número válido",
+			Message: "Price must be a valid number",
 			Value:   record[1],
 		})
 	} else if price < 0 {
 		errors = append(errors, dto.ImportError{
 			Row:     rowNum,
 			Field:   "price",
-			Message: "Preço deve ser positivo",
+			Message: "Price must be positive",
 			Value:   record[1],
 		})
 	}
@@ -312,14 +333,14 @@ func (s *ImportExportService) parseCSVRecord(record []string, rowNum int) (*dto.
 		errors = append(errors, dto.ImportError{
 			Row:     rowNum,
 			Field:   "stock",
-			Message: "Estoque deve ser um número inteiro válido",
+			Message: "Stock must be a valid integer",
 			Value:   record[3],
 		})
 	} else if stock < 0 {
 		errors = append(errors, dto.ImportError{
 			Row:     rowNum,
 			Field:   "stock",
-			Message: "Estoque deve ser não negativo",
+			Message: "Stock must be non-negative",
 			Value:   record[3],
 		})
 	}
