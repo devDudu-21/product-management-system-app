@@ -50,6 +50,18 @@ export function RetryDatabaseConnection() {
   return window['go']['main']['App']['RetryDatabaseConnection']();
 }
 
+export function SaveExportedCSV(arg1, arg2) {
+  return window['go']['main']['App']['SaveExportedCSV'](arg1, arg2);
+}
+
+export function SaveExportedXLSX(arg1, arg2) {
+  return window['go']['main']['App']['SaveExportedXLSX'](arg1, arg2);
+}
+
+export function SaveImportTemplate() {
+  return window['go']['main']['App']['SaveImportTemplate']();
+}
+
 export function UpdateProduct(arg1, arg2, arg3) {
   return window['go']['main']['App']['UpdateProduct'](arg1, arg2, arg3);
 }

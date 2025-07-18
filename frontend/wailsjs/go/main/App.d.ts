@@ -27,4 +27,10 @@ export function ImportProductsFromXLSX(arg1:string):Promise<dto.ImportResult>;
 
 export function RetryDatabaseConnection():Promise<Record<string, any>>;
 
+export function SaveExportedCSV(arg1:boolean,arg2:Array<number>):Promise<void>;
+
+export function SaveExportedXLSX(arg1:boolean,arg2:Array<number>):Promise<void>;
+
+export function SaveImportTemplate():Promise<void>;
+
 export function UpdateProduct(arg1:number,arg2:string,arg3:number):Promise<models.Product>;

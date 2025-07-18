@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"product-management-app/core"
@@ -89,7 +90,7 @@ func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
 
-// GetDatabaseStatus retorna o status atual do banco de dados
+// GetDatabaseStatus returns the current status of the database
 func (a *App) GetDatabaseStatus() map[string]interface{} {
 	return map[string]interface{}{
 		"healthy": a.dbHealthy,
@@ -170,9 +171,7 @@ func (a *App) DeleteProduct(id int) error {
 	return a.productService.DeleteProduct(id)
 }
 
-// Métodos de Importação e Exportação
 
-// ExportProductsToCSV exporta produtos para CSV e retorna o conteúdo como base64
 func (a *App) ExportProductsToCSV(includeAll bool, productIDs []int) (string, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("ExportProductsToCSV failed: %v", err))
@@ -184,11 +183,9 @@ func (a *App) ExportProductsToCSV(includeAll bool, productIDs []int) (string, er
 		return "", err
 	}
 	
-	// Para facilitar o transporte, retornamos como string (o frontend pode converter)
 	return string(data), nil
 }
 
-// ExportProductsToXLSX exporta produtos para XLSX e retorna os dados em base64
 func (a *App) ExportProductsToXLSX(includeAll bool, productIDs []int) (string, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("ExportProductsToXLSX failed: %v", err))
@@ -200,11 +197,9 @@ func (a *App) ExportProductsToXLSX(includeAll bool, productIDs []int) (string, e
 		return "", err
 	}
 	
-	// Retorna os dados como string (o frontend pode lidar com o download)
 	return string(data), nil
 }
 
-// ImportProductsFromCSV importa produtos de dados CSV fornecidos como string
 func (a *App) ImportProductsFromCSV(csvData string) (*dto.ImportResult, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("ImportProductsFromCSV failed: %v", err))
@@ -214,7 +209,6 @@ func (a *App) ImportProductsFromCSV(csvData string) (*dto.ImportResult, error) {
 	return a.productService.ImportProductsFromCSV([]byte(csvData))
 }
 
-// ImportProductsFromXLSX importa produtos de dados XLSX fornecidos como string
 func (a *App) ImportProductsFromXLSX(xlsxData string) (*dto.ImportResult, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("ImportProductsFromXLSX failed: %v", err))
@@ -224,11 +218,129 @@ func (a *App) ImportProductsFromXLSX(xlsxData string) (*dto.ImportResult, error)
 	return a.productService.ImportProductsFromXLSX([]byte(xlsxData))
 }
 
-// GetImportTemplate retorna um template CSV para importação
 func (a *App) GetImportTemplate() string {
 	template := "Nome,Preço,Categoria,Estoque,Descrição,URL da Imagem\n"
 	template += "Produto Exemplo,29.99,Eletrônicos,10,Descrição do produto exemplo,https://exemplo.com/imagem.jpg\n"
 	template += "Outro Produto,49.90,Casa e Jardim,5,Outro exemplo de produto,\n"
 	
 	return template
+}
+
+func (a *App) SaveExportedCSV(includeAll bool, productIDs []int) error {
+	if !a.dbHealthy {
+		runtime.LogError(a.ctx, "SaveExportedCSV failed: database not healthy")
+		return fmt.Errorf("database connection is not healthy")
+	}
+
+	data, err := a.productService.ExportProductsToCSV(includeAll, productIDs)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedCSV failed to generate data: %v", err))
+		return err
+	}
+
+	filename := fmt.Sprintf("produtos_%s.csv", time.Now().Format("2006-01-02"))
+	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		Title:           "Salvar Exportação CSV",
+		DefaultFilename: filename,
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "Arquivos CSV (*.csv)",
+				Pattern:     "*.csv",
+			},
+		},
+	})
+
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedCSV dialog error: %v", err))
+		return err
+	}
+
+	if filePath == "" {
+		return fmt.Errorf("operação cancelada pelo usuário")
+	}
+
+	err = os.WriteFile(filePath, data, 0644)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedCSV write error: %v", err))
+		return fmt.Errorf("erro ao salvar arquivo: %v", err)
+	}
+
+	runtime.LogInfo(a.ctx, fmt.Sprintf("CSV exportado com sucesso para: %s", filePath))
+	return nil
+}
+
+func (a *App) SaveExportedXLSX(includeAll bool, productIDs []int) error {
+	if !a.dbHealthy {
+		runtime.LogError(a.ctx, "SaveExportedXLSX failed: database not healthy")
+		return fmt.Errorf("database connection is not healthy")
+	}
+
+	data, err := a.productService.ExportProductsToXLSX(includeAll, productIDs)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedXLSX failed to generate data: %v", err))
+		return err
+	}
+
+	filename := fmt.Sprintf("produtos_%s.xlsx", time.Now().Format("2006-01-02"))
+	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		Title:           "Salvar Exportação Excel",
+		DefaultFilename: filename,
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "Arquivos Excel (*.xlsx)",
+				Pattern:     "*.xlsx",
+			},
+		},
+	})
+
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedXLSX dialog error: %v", err))
+		return err
+	}
+
+	if filePath == "" {
+		return fmt.Errorf("operação cancelada pelo usuário")
+	}
+
+	err = os.WriteFile(filePath, data, 0644)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedXLSX write error: %v", err))
+		return fmt.Errorf("erro ao salvar arquivo: %v", err)
+	}
+
+	runtime.LogInfo(a.ctx, fmt.Sprintf("XLSX exportado com sucesso para: %s", filePath))
+	return nil
+}
+
+func (a *App) SaveImportTemplate() error {
+	template := a.GetImportTemplate()
+
+	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		Title:           "Salvar Template de Importação",
+		DefaultFilename: "template_produtos.csv",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "Arquivos CSV (*.csv)",
+				Pattern:     "*.csv",
+			},
+		},
+	})
+
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveImportTemplate dialog error: %v", err))
+		return err
+	}
+
+	if filePath == "" {
+		return fmt.Errorf("operação cancelada pelo usuário")
+	}
+
+	err = os.WriteFile(filePath, []byte(template), 0644)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveImportTemplate write error: %v", err))
+		return fmt.Errorf("erro ao salvar template: %v", err)
+	}
+
+	runtime.LogInfo(a.ctx, fmt.Sprintf("Template salvo com sucesso em: %s", filePath))
+	return nil
 }

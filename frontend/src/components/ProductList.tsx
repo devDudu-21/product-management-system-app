@@ -6,6 +6,7 @@ import { useProductList } from "../hooks/useProductList";
 import { AddProductForm } from "./product/AddProductForm";
 import { ProductTable } from "./product/ProductTable";
 import { ProductPagination } from "./product/ProductPagination";
+import { ImportExportActions } from "./product/ImportExportActions";
 import {
   Select,
   SelectContent,
@@ -30,6 +31,7 @@ export function ProductList() {
     handleCreateProduct,
     handleUpdateProduct,
     handleDeleteProduct,
+    reloadProducts,
   } = useProductList({
     page: 1,
     pageSize: 10,
@@ -40,7 +42,6 @@ export function ProductList() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchTimeout, setSearchTimeout] = useState<number | null>(null);
 
-  // Busca e ordenação
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
     if (searchTimeout) clearTimeout(searchTimeout);
@@ -79,7 +80,6 @@ export function ProductList() {
         <div className="glass-card-white rounded-2xl p-8 hover-scale">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg">
-              {/* Ícone de adicionar */}
               <span className="w-6 h-6 text-white">+</span>
             </div>
             <h2 className="text-2xl font-bold text-gray-800">
@@ -110,6 +110,12 @@ export function ProductList() {
                 </div>
               </div>
               <div className="flex items-center gap-4">
+                <ImportExportActions
+                  products={products}
+                  onImportSuccess={reloadProducts}
+                  disabled={!isDatabaseHealthy}
+                />
+
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
