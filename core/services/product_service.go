@@ -43,6 +43,13 @@ func (s *ProductService) CloseDatabase() {
 	}
 }
 
+func (s *ProductService) HealthCheck() error {
+	if s.db != nil {
+		return s.db.HealthCheck()
+	}
+	return fmt.Errorf("database service not initialized")
+}
+
 func (s *ProductService) CreateProduct(createProductDTO dto.CreateProductDTO) (*models.Product, error) {
 	product, err := s.repo.Create(createProductDTO)
 	if err != nil {

@@ -12,6 +12,21 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Configure WebKit environment variables to prevent WebKitWebProcess issues
+configure_webkit_env() {
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        print_info "Configuring environment variables for WebKit on Linux..."
+        export WEBKIT_DISABLE_COMPOSITING_MODE=1
+        export WEBKIT_DISABLE_DMABUF_RENDERER=1
+        export GDK_BACKEND=x11
+        export WAILS_WEBVIEW2_DISABLE_COMPOSITING=1
+        export WEBKIT_DISABLE_SANDBOX_POLICY=1
+        export MALLOC_CHECK_=0
+        export G_SLICE=always-malloc
+        print_success "WebKit environment variables configured!"
+    fi
+}
+
 # Functions
 print_header() {
     echo -e "${BLUE}===================================${NC}"
@@ -44,34 +59,30 @@ command_exists() {
 check_system_deps() {
     print_info "Checking system dependencies..."
     
-    # Check for required packages on Linux
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         print_info "Checking Linux system dependencies..."
         
-        # Check for pkg-config
         if ! command_exists pkg-config; then
             print_error "pkg-config is not installed. Please install it:"
             print_info "sudo apt-get install pkg-config"
             exit 1
         fi
-        
-        # Check for GTK3 development libraries
+
         if ! pkg-config --exists gtk+-3.0; then
             print_error "GTK3 development libraries not found. Please install them:"
             print_info "sudo apt-get install libgtk-3-dev"
             exit 1
         fi
-        
-        # Check for WebKit2GTK development libraries
+
         if ! pkg-config --exists webkit2gtk-4.0 && ! pkg-config --exists webkit2gtk-4.1; then
             print_error "WebKit2GTK development libraries not found. Please install them:"
             print_info "Ubuntu 22.04 and older: sudo apt-get install libwebkit2gtk-4.0-dev"
-            print_info "Ubuntu 24.04 and newer: sudo apt-get install  libwebkit2gtk-4.0-dev"
+            print_info "Ubuntu 24.04 and newer: sudo apt-get install libwebkit2gtk-4.0-dev"
             exit 1
         fi
-        
+
         print_success "All Linux system dependencies are installed"
-        
+
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         print_info "macOS detected - no additional system dependencies required"
     elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
@@ -83,41 +94,34 @@ check_system_deps() {
 install_deps() {
     print_info "Installing dependencies..."
     
-    # Check system dependencies first
     check_system_deps
-    
-    # Check Go
+
     if ! command_exists go; then
         print_error "Go is not installed. Please install Go 1.22 or higher."
         exit 1
     fi
-    
-    # Check Node.js
+
     if ! command_exists node; then
         print_error "Node.js is not installed. Please install Node.js 18 or higher."
         exit 1
     fi
-    
-    # Check npm
+
     if ! command_exists npm; then
         print_error "npm is not installed. Please install npm."
         exit 1
     fi
-    
-    # Install Wails if not present
+
     if ! command_exists wails; then
         print_info "Installing Wails CLI..."
         go install github.com/wailsapp/wails/v2/cmd/wails@latest
         print_success "Wails CLI installed"
     fi
-    
-    # Install Go dependencies
+
     print_info "Installing Go dependencies..."
     go mod download
     go mod verify
     print_success "Go dependencies installed"
-    
-    # Install frontend dependencies
+
     print_info "Installing frontend dependencies..."
     cd frontend
     npm ci --prefer-offline
@@ -128,12 +132,14 @@ install_deps() {
 # Run development server
 dev() {
     print_info "Starting development server..."
+    configure_webkit_env
     wails dev
 }
 
 # Build the application
 build() {
     print_info "Building application..."
+    configure_webkit_env
     wails build --clean
     print_success "Build completed"
 }
@@ -141,13 +147,11 @@ build() {
 # Run tests
 test() {
     print_info "Running tests..."
-    
-    # Go tests
+
     print_info "Running Go tests..."
     go test -v -race ./...
     print_success "Go tests passed"
-    
-    # Frontend tests (if available)
+
     if [ -f "frontend/package.json" ] && grep -q '"test"' frontend/package.json; then
         print_info "Running frontend tests..."
         cd frontend
@@ -159,8 +163,7 @@ test() {
 # Run linting
 lint() {
     print_info "Running linters..."
-    
-    # Go linting
+
     if command_exists golangci-lint; then
         print_info "Running golangci-lint..."
         golangci-lint run
@@ -171,8 +174,7 @@ lint() {
         gofmt -l . | head -10
         go vet ./...
     fi
-    
-    # Frontend linting
+
     print_info "Running frontend linting..."
     cd frontend
     npm run lint
@@ -183,8 +185,7 @@ lint() {
 # Check formatting
 format_check() {
     print_info "Checking code formatting..."
-    
-    # Go formatting
+
     UNFORMATTED=$(gofmt -l . | head -10)
     if [ -n "$UNFORMATTED" ]; then
         print_error "Go code is not properly formatted:"
@@ -193,8 +194,7 @@ format_check() {
         return 1
     fi
     print_success "Go code is properly formatted"
-    
-    # Frontend formatting (if script exists)
+
     if [ -f "frontend/package.json" ] && grep -q '"format:check"' frontend/package.json; then
         cd frontend
         npm run format:check
@@ -206,12 +206,10 @@ format_check() {
 # Format code
 format() {
     print_info "Formatting code..."
-    
-    # Go formatting
+
     gofmt -w .
     print_success "Go code formatted"
-    
-    # Frontend formatting (if script exists)
+
     if [ -f "frontend/package.json" ] && grep -q '"format"' frontend/package.json; then
         cd frontend
         npm run format
@@ -223,19 +221,15 @@ format() {
 # Clean build artifacts
 clean() {
     print_info "Cleaning build artifacts..."
-    
-    # Clean Wails cache
+
     if command_exists wails; then
         wails clean
     fi
-    
-    # Clean build directory
+
     rm -rf build/bin/*
-    
-    # Clean frontend build
     rm -rf frontend/dist
     rm -rf frontend/node_modules/.cache
-    
+
     print_success "Build artifacts cleaned"
 }
 
@@ -268,7 +262,7 @@ help() {
 ci() {
     print_header
     print_info "Running full CI pipeline locally..."
-    
+
     install_deps
     echo ""
     lint

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   DollarSign,
   ChevronDown,
@@ -26,12 +26,15 @@ export function CurrencySelector() {
   } = useCurrency();
   const { t } = useTranslation();
 
-  const currencies = getSupportedCurrencies();
+  const currencies = useMemo(
+    () => getSupportedCurrencies(),
+    [getSupportedCurrencies]
+  );
 
-  useEffect(() => {
-    const loadRates = async () => {
-      if (currencies.length === 0) return;
+  const loadRates = useCallback(async () => {
+    if (currencies.length === 0) return;
 
+    try {
       const ratePromises = currencies.map(async currency => {
         if (currency.code === "BRL") return [currency.code, 1];
         try {
@@ -49,24 +52,34 @@ export function CurrencySelector() {
       const results = await Promise.all(ratePromises);
       const newRates = Object.fromEntries(results);
       setRates(newRates);
-    };
+    } catch (error) {
+      console.error("Error loading rates:", error);
+    }
+  }, [currencies, convertCurrency, exchangeRates]);
 
+  useEffect(() => {
     if (currencies.length > 0 && (isOpen || Object.keys(rates).length === 0)) {
       loadRates();
     }
-  }, [currencies, convertCurrency, isOpen, exchangeRates, rates]);
+  }, [currencies, isOpen, loadRates]); // Agora usa loadRates memoizado
 
-  const handleCurrencyChange = (currencyCode: string) => {
-    setCurrency(currencyCode);
-    setIsOpen(false);
-  };
+  const handleCurrencyChange = useCallback(
+    (currencyCode: string) => {
+      setCurrency(currencyCode);
+      setIsOpen(false);
+    },
+    [setCurrency]
+  );
 
-  const handleRefreshRates = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    await refreshExchangeRates();
-  };
+  const handleRefreshRates = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      await refreshExchangeRates();
+    },
+    [refreshExchangeRates]
+  );
 
-  const formatLastUpdated = () => {
+  const formatLastUpdated = useCallback(() => {
     if (!lastUpdated) return t("currency.never", "Nunca");
 
     const now = new Date();
@@ -81,9 +94,9 @@ export function CurrencySelector() {
 
     const days = Math.floor(hours / 24);
     return t("currency.daysAgo", `${days}d atrás`);
-  };
+  }, [lastUpdated, t]);
 
-  const getStatusColor = () => {
+  const getStatusColor = useCallback(() => {
     if (!lastUpdated) return "text-gray-500";
 
     const now = new Date();
@@ -93,7 +106,7 @@ export function CurrencySelector() {
     if (minutes < 30) return "text-green-500";
     if (minutes < 120) return "text-yellow-500";
     return "text-red-500";
-  };
+  }, [lastUpdated]);
 
   return (
     <div className="relative">

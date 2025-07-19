@@ -26,6 +26,7 @@ export function CurrencyStatusIndicator({
     lastUpdated,
     isLoading,
     getCurrencySymbol,
+    hasValidData,
   } = useCurrency();
   const { t } = useTranslation();
 
@@ -40,8 +41,24 @@ export function CurrencyStatusIndicator({
         return;
       }
 
-      if (!lastUpdated) {
+      if (isLoading) {
+        setConnectionStatus("online");
+        return;
+      }
+
+      const hasMinimalData = exchangeRates.BRL === 1.0;
+
+      if (!hasValidData && !hasMinimalData) {
         setConnectionStatus("error");
+        return;
+      }
+
+      if (!lastUpdated) {
+        if (hasMinimalData) {
+          setConnectionStatus("online");
+        } else {
+          setConnectionStatus("error");
+        }
         return;
       }
 
@@ -61,7 +78,7 @@ export function CurrencyStatusIndicator({
     const interval = setInterval(checkStatus, 30000);
 
     return () => clearInterval(interval);
-  }, [lastUpdated]);
+  }, [lastUpdated, isLoading, hasValidData, exchangeRates, currentCurrency]);
 
   const formatLastUpdated = () => {
     if (!lastUpdated) return t("currency.never", "Nunca");
