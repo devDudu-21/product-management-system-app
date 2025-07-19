@@ -82,7 +82,7 @@ func (a *App) domReady(ctx context.Context) {
 // Returning true will cause the application to continue, false will continue shutdown as normal.
 func (a *App) beforeClose(ctx context.Context) (prevent bool) {
 	runtime.LogInfo(a.ctx, "Application close requested...")
-	
+
 	// Ensure proper cleanup before closing
 	if a.productService != nil {
 		runtime.LogInfo(a.ctx, "Preparing database for shutdown...")
@@ -92,29 +92,29 @@ func (a *App) beforeClose(ctx context.Context) (prevent bool) {
 			runtime.LogWarning(a.ctx, fmt.Sprintf("Database health check failed during shutdown: %v", err))
 		}
 	}
-	
+
 	return false
 }
 
 // shutdown is called at application termination
 func (a *App) shutdown(ctx context.Context) {
 	runtime.LogInfo(a.ctx, "Application shutdown initiated...")
-	
+
 	// Close database connection gracefully
 	if a.productService != nil {
 		runtime.LogInfo(a.ctx, "Closing database connection...")
 		a.productService.CloseDatabase()
 	}
-	
+
 	// Clear currency service cache
 	if a.currencyService != nil {
 		runtime.LogInfo(a.ctx, "Clearing currency cache...")
 		a.currencyService.ClearCache()
 	}
-	
+
 	// Give some time for resources to be released
 	time.Sleep(100 * time.Millisecond)
-	
+
 	runtime.LogInfo(a.ctx, "Application shutdown complete.")
 }
 

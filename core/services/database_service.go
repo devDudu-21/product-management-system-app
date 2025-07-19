@@ -49,7 +49,7 @@ func (d *DatabaseService) InitDatabase() error {
 func (d *DatabaseService) CloseDatabase() {
 	if d.DB != nil {
 		runtime.LogInfo(d.Ctx, "Closing database connection...")
-		
+
 		// Ensure all transactions are completed before closing
 		if err := d.DB.Ping(); err == nil {
 			// Database is still responsive, perform cleanup
@@ -58,7 +58,7 @@ func (d *DatabaseService) CloseDatabase() {
 				runtime.LogWarning(d.Ctx, fmt.Sprintf("Failed to optimize database before close: %v", err))
 			}
 		}
-		
+
 		err := d.DB.Close()
 		if err != nil {
 			runtime.LogError(d.Ctx, fmt.Sprintf("Error closing database: %v", err))

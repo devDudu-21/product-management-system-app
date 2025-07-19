@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import {
   DollarSign,
   ChevronDown,
@@ -13,6 +19,7 @@ import { useTranslation } from "react-i18next";
 export function CurrencySelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [rates, setRates] = useState<{ [key: string]: number }>({});
+  const hasLoadedInitialRates = useRef(false);
   const {
     currentCurrency,
     setCurrency,
@@ -58,10 +65,17 @@ export function CurrencySelector() {
   }, [currencies, convertCurrency, exchangeRates]);
 
   useEffect(() => {
-    if (currencies.length > 0 && (isOpen || Object.keys(rates).length === 0)) {
+    // Carrega taxas quando o dropdown é aberto
+    if (currencies.length > 0 && isOpen) {
       loadRates();
     }
-  }, [currencies, isOpen, loadRates]); // Agora usa loadRates memoizado
+
+    // Carrega taxas iniciais apenas uma vez quando as moedas estão disponíveis
+    if (currencies.length > 0 && !hasLoadedInitialRates.current) {
+      loadRates();
+      hasLoadedInitialRates.current = true;
+    }
+  }, [currencies, isOpen, loadRates]);
 
   const handleCurrencyChange = useCallback(
     (currencyCode: string) => {
