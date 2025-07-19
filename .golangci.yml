@@ -1,4 +1,3 @@
-# Basic golangci-lint configuration
 run:
   timeout: 5m
 
