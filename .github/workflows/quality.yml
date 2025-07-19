@@ -53,7 +53,7 @@ jobs:
       - name: Run Go linting
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.62.0
+          version: latest
           install-mode: binary
           args: --timeout=5m
 
