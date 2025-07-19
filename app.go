@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"os"
 	"time"
 
-	"product-management-app/core"
 	"product-management-app/core/dto"
 	"product-management-app/core/models"
+	service "product-management-app/core/services"
 
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -15,10 +17,11 @@ import (
 
 // App struct
 type App struct {
-	ctx            context.Context
-	productService *core.ProductService
-	dbHealthy      bool
-	dbError        string
+	ctx             context.Context
+	productService  *service.ProductService
+	currencyService *service.WailsCurrencyService
+	dbHealthy       bool
+	dbError         string
 }
 
 // NewApp creates a new App application struct
@@ -30,8 +33,12 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	// Perform your setup here
 	a.ctx = ctx
-	a.productService = core.NewProductService()
+	a.productService = service.NewProductService()
 	a.productService.SetContext(ctx)
+
+	// Initialize currency service
+	a.currencyService = service.NewWailsCurrencyService(ctx)
+	runtime.LogInfo(a.ctx, "Currency service initialized successfully")
 
 	maxRetries := 3
 	retryDelay := time.Second * 2
@@ -89,7 +96,7 @@ func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
 
-// GetDatabaseStatus retorna o status atual do banco de dados
+// GetDatabaseStatus returns the current status of the database
 func (a *App) GetDatabaseStatus() map[string]interface{} {
 	return map[string]interface{}{
 		"healthy": a.dbHealthy,
@@ -168,4 +175,207 @@ func (a *App) DeleteProduct(id int) error {
 		return err
 	}
 	return a.productService.DeleteProduct(id)
+}
+
+func (a *App) ExportProductsToCSV(includeAll bool, productIDs []int) (string, error) {
+	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("ExportProductsToCSV failed: %v", err))
+		return "", err
+	}
+
+	data, err := a.productService.ExportProductsToCSV(includeAll, productIDs)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}
+
+func (a *App) ExportProductsToXLSX(includeAll bool, productIDs []int) (string, error) {
+	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("ExportProductsToXLSX failed: %v", err))
+		return "", err
+	}
+
+	data, err := a.productService.ExportProductsToXLSX(includeAll, productIDs)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}
+
+func (a *App) ImportProductsFromCSV(csvData string) (*dto.ImportResult, error) {
+	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("ImportProductsFromCSV failed: %v", err))
+		return nil, err
+	}
+
+	return a.productService.ImportProductsFromCSV([]byte(csvData))
+}
+
+func (a *App) ImportProductsFromXLSX(xlsxData string) (*dto.ImportResult, error) {
+	if err := a.checkDatabaseHealth(); err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("ImportProductsFromXLSX failed: %v", err))
+		return nil, err
+	}
+
+	data, err := base64.StdEncoding.DecodeString(xlsxData)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("Failed to decode XLSX base64 data: %v", err))
+		return nil, fmt.Errorf("invalid XLSX data format: %v", err)
+	}
+
+	return a.productService.ImportProductsFromXLSX(data)
+}
+
+func (a *App) GetImportTemplate() string {
+	template := "Name,Price,Category,Stock,Description,Image URL\n"
+	template += "Example Product,29.99,Electronics,10,Example product description,https://example.com/image.jpg\n"
+	template += "Another Product,49.90,Home & Garden,5,Another example product,\n"
+
+	return template
+}
+
+func (a *App) SaveExportedCSV(includeAll bool, productIDs []int) error {
+	if !a.dbHealthy {
+		runtime.LogError(a.ctx, "SaveExportedCSV failed: database not healthy")
+		return fmt.Errorf("database connection is not healthy")
+	}
+
+	data, err := a.productService.ExportProductsToCSV(includeAll, productIDs)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedCSV failed to generate data: %v", err))
+		return err
+	}
+
+	filename := fmt.Sprintf("products_%s.csv", time.Now().Format("2006-01-02"))
+	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		Title:           "Save CSV Export",
+		DefaultFilename: filename,
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "CSV Files (*.csv)",
+				Pattern:     "*.csv",
+			},
+		},
+	})
+
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedCSV dialog error: %v", err))
+		return err
+	}
+
+	if filePath == "" {
+		return fmt.Errorf("operation cancelled by user")
+	}
+
+	err = os.WriteFile(filePath, data, 0600)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedCSV write error: %v", err))
+		return fmt.Errorf("error saving file: %v", err)
+	}
+
+	runtime.LogInfo(a.ctx, fmt.Sprintf("CSV exported successfully to: %s", filePath))
+	return nil
+}
+
+func (a *App) SaveExportedXLSX(includeAll bool, productIDs []int) error {
+	if !a.dbHealthy {
+		runtime.LogError(a.ctx, "SaveExportedXLSX failed: database not healthy")
+		return fmt.Errorf("database connection is not healthy")
+	}
+
+	data, err := a.productService.ExportProductsToXLSX(includeAll, productIDs)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedXLSX failed to generate data: %v", err))
+		return err
+	}
+
+	filename := fmt.Sprintf("products_%s.xlsx", time.Now().Format("2006-01-02"))
+	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		Title:           "Save Excel Export",
+		DefaultFilename: filename,
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "Excel Files (*.xlsx)",
+				Pattern:     "*.xlsx",
+			},
+		},
+	})
+
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedXLSX dialog error: %v", err))
+		return err
+	}
+
+	if filePath == "" {
+		return fmt.Errorf("operation cancelled by user")
+	}
+
+	err = os.WriteFile(filePath, data, 0600)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedXLSX write error: %v", err))
+		return fmt.Errorf("error saving file: %v", err)
+	}
+
+	runtime.LogInfo(a.ctx, fmt.Sprintf("XLSX exported successfully to: %s", filePath))
+	return nil
+}
+
+func (a *App) SaveImportTemplate() error {
+	template := a.GetImportTemplate()
+
+	filePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		Title:           "Save Import Template",
+		DefaultFilename: "products_template.csv",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "CSV Files (*.csv)",
+				Pattern:     "*.csv",
+			},
+		},
+	})
+
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveImportTemplate dialog error: %v", err))
+		return err
+	}
+
+	if filePath == "" {
+		return fmt.Errorf("operation cancelled by user")
+	}
+
+	err = os.WriteFile(filePath, []byte(template), 0600)
+	if err != nil {
+		runtime.LogError(a.ctx, fmt.Sprintf("SaveImportTemplate write error: %v", err))
+		return fmt.Errorf("error saving template: %v", err)
+	}
+
+	runtime.LogInfo(a.ctx, fmt.Sprintf("Template saved successfully to: %s", filePath))
+	return nil
+}
+
+// ConvertCurrency converts an amount from one currency to another
+func (a *App) ConvertCurrency(request dto.CurrencyConversionRequest) (*dto.CurrencyConversionResponse, error) {
+	runtime.LogInfo(a.ctx, fmt.Sprintf("ConvertCurrency called: %.2f %s to %s", request.Amount, request.FromCurrency, request.ToCurrency))
+	return a.currencyService.ConvertCurrency(request)
+}
+
+// GetSupportedCurrencies returns the list of supported currencies
+func (a *App) GetSupportedCurrencies() *dto.SupportedCurrenciesResponse {
+	runtime.LogInfo(a.ctx, "GetSupportedCurrencies called")
+	return a.currencyService.GetSupportedCurrencies()
+}
+
+// GetExchangeRatesForCurrency returns all exchange rates for a base currency
+func (a *App) GetExchangeRatesForCurrency(baseCurrency string) (*dto.CurrencyRatesResponse, error) {
+	runtime.LogInfo(a.ctx, fmt.Sprintf("GetExchangeRatesForCurrency called for: %s", baseCurrency))
+	return a.currencyService.GetExchangeRatesForCurrency(baseCurrency)
+}
+
+// ClearCurrencyCache clears the currency exchange rates cache
+func (a *App) ClearCurrencyCache() {
+	runtime.LogInfo(a.ctx, "ClearCurrencyCache called")
+	a.currencyService.ClearCache()
 }

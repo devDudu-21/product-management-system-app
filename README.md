@@ -14,10 +14,23 @@ A modern and efficient product management system built with Wails, offering a na
 ## 🚀 Features
 
 - ✅ **Complete CRUD**: Create, list, edit and delete products
-- 💱 **Multi-currency**: Support for BRL, USD and EUR with automatic conversion
+- 💱 **Real-time Currency Conversion**: Support for 10+ currencies with live exchange rates
 - 🌍 **Internationalization**: Portuguese (BR) and English
 - 🗄️ **SQLite Database**: Reliable local storage
 - 🔄 **Auto-reconnection**: Robust connection recovery system
+- 📊 **Import/Export**: CSV and XLSX support with validation
+- 🎯 **Modern UI**: Clean and responsive interface with dark/light mode
+- 🚀 **High Performance**: Cache system and optimized queries
+- 🔒 **Type Safety**: Full TypeScript support
+- 🧪 **Tested**: Unit tests for critical components
+
+### 💱 Currency Conversion Features
+
+- **Real-time Exchange Rates**: Uses public APIs for up-to-date conversion rates
+- **10+ Supported Currencies**: BRL, USD, EUR, GBP, JPY, CAD, AUD, CHF, CNY, INR
+- **Smart Caching**: 30-minute cache to optimize performance
+- **Automatic Fallback**: Dual API system ensures high availability
+- **Error Handling**: Graceful degradation and retry mechanisms
 - 🎨 **Modern UI**: Elegant interface with TailwindCSS and shadcn/ui
 - 📱 **Responsive**: Adaptive layout for different screen sizes
 - 🌙 **Glassmorphism Design**: Modern visual with glass effects

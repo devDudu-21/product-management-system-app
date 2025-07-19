@@ -4,8 +4,8 @@ import { ShoppingBag, Edit, Trash2, ChevronDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { PriceInput } from "../PriceInput";
+import { PriceDisplay } from "../PriceDisplay";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../ui/tooltip";
-import { useCurrency } from "../../hooks/useCurrency";
 import { useTranslation } from "react-i18next";
 import {
   Dialog,
@@ -34,7 +34,6 @@ export function ProductTable({
   isDatabaseHealthy,
 }: ProductTableProps) {
   const { t } = useTranslation();
-  const { formatCurrency, convertFromBRL } = useCurrency();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [expandedProductId, setExpandedProductId] = useState<number | null>(
     null
@@ -89,9 +88,13 @@ export function ProductTable({
                 </div>
               </td>
               <td className="px-8 py-6">
-                <div className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-lg font-semibold rounded-full">
-                  {formatCurrency(convertFromBRL(product.price))}
-                </div>
+                <PriceDisplay
+                  price={product.price}
+                  className="px-3 py-1 bg-green-100 text-green-800 text-lg font-semibold rounded-full"
+                  size="lg"
+                  variant="emphasized"
+                  showOriginalPrice={false}
+                />
               </td>
               <td className="px-8 py-6">
                 <div className="flex items-center space-x-3">

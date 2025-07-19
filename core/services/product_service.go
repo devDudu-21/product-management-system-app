@@ -1,19 +1,21 @@
-package core
+package service
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"product-management-app/core/dto"
 	"product-management-app/core/models"
 	"product-management-app/core/repositories"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type ProductService struct {
-	repo *repositories.ProductRepository
-	ctx  context.Context
-	db   *DatabaseService
+	repo                *repositories.ProductRepository
+	ctx                 context.Context
+	db                  *DatabaseService
+	importExportService *ImportExportService
 }
 
 func (s *ProductService) SetContext(ctx context.Context) {
@@ -31,6 +33,7 @@ func (s *ProductService) InitDatabase() error {
 		return err
 	}
 	s.repo = repositories.NewProductRepository(s.db.DB, s.ctx)
+	s.importExportService = NewImportExportService(s.repo, s.ctx)
 	return nil
 }
 
@@ -88,4 +91,60 @@ func (s *ProductService) DeleteProduct(id int) error {
 	}
 	runtime.LogInfo(s.ctx, fmt.Sprintf("Product deleted: ID %d", id))
 	return nil
+}
+
+func (s *ProductService) ExportProductsToCSV(includeAll bool, productIDs []int) ([]byte, error) {
+	request := dto.ExportRequest{
+		Format:     dto.FormatCSV,
+		IncludeAll: includeAll,
+		ProductIDs: productIDs,
+	}
+
+	data, err := s.importExportService.ExportToCSV(request)
+	if err != nil {
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to export products to CSV: %v", err))
+		return nil, err
+	}
+
+	runtime.LogInfo(s.ctx, "Products exported to CSV successfully")
+	return data, nil
+}
+
+func (s *ProductService) ExportProductsToXLSX(includeAll bool, productIDs []int) ([]byte, error) {
+	request := dto.ExportRequest{
+		Format:     dto.FormatXLSX,
+		IncludeAll: includeAll,
+		ProductIDs: productIDs,
+	}
+
+	data, err := s.importExportService.ExportToXLSX(request)
+	if err != nil {
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to export products to XLSX: %v", err))
+		return nil, err
+	}
+
+	runtime.LogInfo(s.ctx, "Products exported to XLSX successfully")
+	return data, nil
+}
+
+func (s *ProductService) ImportProductsFromCSV(data []byte) (*dto.ImportResult, error) {
+	result, err := s.importExportService.ImportFromCSV(data)
+	if err != nil {
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to import products from CSV: %v", err))
+		return nil, err
+	}
+
+	runtime.LogInfo(s.ctx, fmt.Sprintf("CSV import completed: %d success, %d errors", result.SuccessCount, result.ErrorCount))
+	return result, nil
+}
+
+func (s *ProductService) ImportProductsFromXLSX(data []byte) (*dto.ImportResult, error) {
+	result, err := s.importExportService.ImportFromXLSX(data)
+	if err != nil {
+		runtime.LogError(s.ctx, fmt.Sprintf("Failed to import products from XLSX: %v", err))
+		return nil, err
+	}
+
+	runtime.LogInfo(s.ctx, fmt.Sprintf("XLSX import completed: %d success, %d errors", result.SuccessCount, result.ErrorCount))
+	return result, nil
 }

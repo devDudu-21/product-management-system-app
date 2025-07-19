@@ -3,18 +3,42 @@
 import {dto} from '../models';
 import {models} from '../models';
 
+export function ClearCurrencyCache():Promise<void>;
+
+export function ConvertCurrency(arg1:dto.CurrencyConversionRequest):Promise<dto.CurrencyConversionResponse>;
+
 export function CreateProduct(arg1:dto.CreateProductDTO):Promise<models.Product>;
 
 export function DeleteProduct(arg1:number):Promise<void>;
+
+export function ExportProductsToCSV(arg1:boolean,arg2:Array<number>):Promise<string>;
+
+export function ExportProductsToXLSX(arg1:boolean,arg2:Array<number>):Promise<string>;
 
 export function GetAllProducts(arg1:dto.PaginationDTO):Promise<dto.PaginationResponse>;
 
 export function GetDatabaseStatus():Promise<Record<string, any>>;
 
+export function GetExchangeRatesForCurrency(arg1:string):Promise<dto.CurrencyRatesResponse>;
+
+export function GetImportTemplate():Promise<string>;
+
 export function GetProduct(arg1:number):Promise<models.Product>;
+
+export function GetSupportedCurrencies():Promise<dto.SupportedCurrenciesResponse>;
 
 export function Greet(arg1:string):Promise<string>;
 
+export function ImportProductsFromCSV(arg1:string):Promise<dto.ImportResult>;
+
+export function ImportProductsFromXLSX(arg1:string):Promise<dto.ImportResult>;
+
 export function RetryDatabaseConnection():Promise<Record<string, any>>;
+
+export function SaveExportedCSV(arg1:boolean,arg2:Array<number>):Promise<void>;
+
+export function SaveExportedXLSX(arg1:boolean,arg2:Array<number>):Promise<void>;
+
+export function SaveImportTemplate():Promise<void>;
 
 export function UpdateProduct(arg1:number,arg2:string,arg3:number):Promise<models.Product>;

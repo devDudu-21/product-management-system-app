@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { models, dto } from "wailsjs/go/models";
+import { models, dto } from "../../wailsjs/go/models";
 import {
   CreateProduct,
   GetAllProducts,
@@ -102,5 +102,6 @@ export function useProductList(initialParams: PaginationParams) {
     handleCreateProduct,
     handleUpdateProduct,
     handleDeleteProduct,
+    reloadProducts: loadProducts,
   };
 }
