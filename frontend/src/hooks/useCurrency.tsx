@@ -26,6 +26,7 @@ interface CurrencyContextType {
   isLoading: boolean;
   exchangeRates: { [key: string]: number };
   lastUpdated: Date | null;
+  hasValidData: boolean;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(
@@ -53,10 +54,28 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
         setCurrentCurrency(savedCurrency);
       }
 
-      // Atualizar timestamp da última atualização
-      const rates = currencyService.getExchangeRates();
-      if (Object.keys(rates).length > 0) {
+      // Sempre definir lastUpdated baseado no serviço
+      const serviceLastFetch = currencyService.getLastFetchTime();
+      if (serviceLastFetch) {
+        setLastUpdated(serviceLastFetch);
+      } else {
+        // Se não há timestamp do serviço, usar timestamp atual já que sempre temos dados básicos
         setLastUpdated(new Date());
+      }
+
+      // Verificar se precisa atualizar dados do backend
+      const rates = currencyService.getExchangeRates();
+      if (Object.keys(rates).length < 10) {
+        // Não temos todas as moedas ainda
+        try {
+          setIsLoading(true);
+          await currencyService.refreshExchangeRates();
+          setLastUpdated(new Date());
+        } catch (error) {
+          console.warn("Failed to refresh exchange rates on init:", error);
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -188,6 +207,10 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
     return currencyService.getExchangeRates();
   }, [currencyService]);
 
+  const hasValidData = useMemo(() => {
+    return currencyService.hasValidData();
+  }, [currencyService]);
+
   const value: CurrencyContextType = useMemo(
     () => ({
       currentCurrency,
@@ -202,6 +225,7 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
       isLoading,
       exchangeRates,
       lastUpdated,
+      hasValidData,
     }),
     [
       currentCurrency,
@@ -216,6 +240,7 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
       isLoading,
       exchangeRates,
       lastUpdated,
+      hasValidData,
     ]
   );
 

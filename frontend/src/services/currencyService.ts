@@ -26,8 +26,39 @@ export class CurrencyService {
   private conversionCache: CurrencyConversionCache;
 
   private constructor() {
+    this.initializeBasicData();
     this.loadSupportedCurrencies();
     this.conversionCache = CurrencyConversionCache.getInstance();
+  }
+
+  private initializeBasicData(): void {
+    this.supportedCurrencies = [
+      { code: "BRL", symbol: "R$", name: "Real Brasileiro", rate: 1.0 },
+      { code: "USD", symbol: "$", name: "US Dollar", rate: 0.2 },
+      { code: "EUR", symbol: "€", name: "Euro", rate: 0.18 },
+      { code: "GBP", symbol: "£", name: "British Pound", rate: 0.15 },
+      { code: "JPY", symbol: "¥", name: "Japanese Yen", rate: 30.0 },
+      { code: "CAD", symbol: "C$", name: "Canadian Dollar", rate: 0.27 },
+      { code: "AUD", symbol: "A$", name: "Australian Dollar", rate: 0.3 },
+      { code: "CHF", symbol: "CHF", name: "Swiss Franc", rate: 0.18 },
+      { code: "CNY", symbol: "¥", name: "Chinese Yuan", rate: 1.45 },
+      { code: "INR", symbol: "₹", name: "Indian Rupee", rate: 16.8 },
+    ];
+
+    this.exchangeRates = {
+      BRL: 1.0,
+      USD: 0.2,
+      EUR: 0.18,
+      GBP: 0.15,
+      JPY: 30.0,
+      CAD: 0.27,
+      AUD: 0.3,
+      CHF: 0.18,
+      CNY: 1.45,
+      INR: 16.8,
+    };
+
+    this.lastFetchTime = Date.now();
   }
 
   public static getInstance(): CurrencyService {
@@ -44,17 +75,12 @@ export class CurrencyService {
         code: currency.code,
         symbol: currency.symbol,
         name: currency.name,
-        rate: 1.0,
+        rate: this.exchangeRates[currency.code] || 1.0,
       }));
 
       await this.updateExchangeRatesFromBackend();
     } catch (error) {
       console.error("Error loading supported currencies:", error);
-      this.supportedCurrencies = [
-        { code: "BRL", symbol: "R$", name: "Real Brasileiro", rate: 1.0 },
-        { code: "USD", symbol: "$", name: "US Dollar", rate: 0.2 },
-        { code: "EUR", symbol: "€", name: "Euro", rate: 0.18 },
-      ];
     }
   }
 
@@ -270,6 +296,14 @@ export class CurrencyService {
 
   public getExchangeRates(): ExchangeRates {
     return { ...this.exchangeRates };
+  }
+
+  public hasValidData(): boolean {
+    return Object.keys(this.exchangeRates).length > 0;
+  }
+
+  public getLastFetchTime(): Date | null {
+    return this.lastFetchTime > 0 ? new Date(this.lastFetchTime) : null;
   }
 
   public getCacheStats() {

@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import {
   DollarSign,
   ChevronDown,
@@ -13,6 +19,7 @@ import { useTranslation } from "react-i18next";
 export function CurrencySelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [rates, setRates] = useState<{ [key: string]: number }>({});
+  const hasLoadedInitialRates = useRef(false);
   const {
     currentCurrency,
     setCurrency,
@@ -26,12 +33,15 @@ export function CurrencySelector() {
   } = useCurrency();
   const { t } = useTranslation();
 
-  const currencies = getSupportedCurrencies();
+  const currencies = useMemo(
+    () => getSupportedCurrencies(),
+    [getSupportedCurrencies]
+  );
 
-  useEffect(() => {
-    const loadRates = async () => {
-      if (currencies.length === 0) return;
+  const loadRates = useCallback(async () => {
+    if (currencies.length === 0) return;
 
+    try {
       const ratePromises = currencies.map(async currency => {
         if (currency.code === "BRL") return [currency.code, 1];
         try {
@@ -49,24 +59,41 @@ export function CurrencySelector() {
       const results = await Promise.all(ratePromises);
       const newRates = Object.fromEntries(results);
       setRates(newRates);
-    };
+    } catch (error) {
+      console.error("Error loading rates:", error);
+    }
+  }, [currencies, convertCurrency, exchangeRates]);
 
-    if (currencies.length > 0 && (isOpen || Object.keys(rates).length === 0)) {
+  useEffect(() => {
+    // Carrega taxas quando o dropdown é aberto
+    if (currencies.length > 0 && isOpen) {
       loadRates();
     }
-  }, [currencies, convertCurrency, isOpen, exchangeRates, rates]);
 
-  const handleCurrencyChange = (currencyCode: string) => {
-    setCurrency(currencyCode);
-    setIsOpen(false);
-  };
+    // Carrega taxas iniciais apenas uma vez quando as moedas estão disponíveis
+    if (currencies.length > 0 && !hasLoadedInitialRates.current) {
+      loadRates();
+      hasLoadedInitialRates.current = true;
+    }
+  }, [currencies, isOpen, loadRates]);
 
-  const handleRefreshRates = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    await refreshExchangeRates();
-  };
+  const handleCurrencyChange = useCallback(
+    (currencyCode: string) => {
+      setCurrency(currencyCode);
+      setIsOpen(false);
+    },
+    [setCurrency]
+  );
 
-  const formatLastUpdated = () => {
+  const handleRefreshRates = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      await refreshExchangeRates();
+    },
+    [refreshExchangeRates]
+  );
+
+  const formatLastUpdated = useCallback(() => {
     if (!lastUpdated) return t("currency.never", "Nunca");
 
     const now = new Date();
@@ -81,9 +108,9 @@ export function CurrencySelector() {
 
     const days = Math.floor(hours / 24);
     return t("currency.daysAgo", `${days}d atrás`);
-  };
+  }, [lastUpdated, t]);
 
-  const getStatusColor = () => {
+  const getStatusColor = useCallback(() => {
     if (!lastUpdated) return "text-gray-500";
 
     const now = new Date();
@@ -93,7 +120,7 @@ export function CurrencySelector() {
     if (minutes < 30) return "text-green-500";
     if (minutes < 120) return "text-yellow-500";
     return "text-red-500";
-  };
+  }, [lastUpdated]);
 
   return (
     <div className="relative">
