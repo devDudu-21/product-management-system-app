@@ -1,3 +1,4 @@
+// Package main is the entry point for the Product Management Application using Wails.
 package main
 
 import (
@@ -73,14 +74,14 @@ func (a *App) onSecondInstanceLaunch(secondInstanceData options.SecondInstanceDa
 }
 
 // domReady is called after front-end resources have been loaded
-func (a *App) domReady(ctx context.Context) {
+func (a *App) domReady(_ context.Context) {
 	// Add your action here
 }
 
 // beforeClose is called when the application is about to quit,
 // either by clicking the window close button or calling runtime.Quit.
 // Returning true will cause the application to continue, false will continue shutdown as normal.
-func (a *App) beforeClose(ctx context.Context) (prevent bool) {
+func (a *App) beforeClose(_ context.Context) (prevent bool) {
 	runtime.LogInfo(a.ctx, "Application close requested...")
 
 	// Ensure proper cleanup before closing
@@ -97,7 +98,7 @@ func (a *App) beforeClose(ctx context.Context) (prevent bool) {
 }
 
 // shutdown is called at application termination
-func (a *App) shutdown(ctx context.Context) {
+func (a *App) shutdown(_ context.Context) {
 	runtime.LogInfo(a.ctx, "Application shutdown initiated...")
 
 	// Close database connection gracefully
@@ -164,7 +165,7 @@ func (a *App) checkDatabaseHealth() error {
 	return nil
 }
 
-// CRUD methods to interact with ProductService
+// CreateProduct creates a new product using the provided DTO.
 func (a *App) CreateProduct(createProductDTO dto.CreateProductDTO) (*models.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("CreateProduct failed: %v", err))
@@ -173,6 +174,7 @@ func (a *App) CreateProduct(createProductDTO dto.CreateProductDTO) (*models.Prod
 	return a.productService.CreateProduct(createProductDTO)
 }
 
+// GetProduct retrieves a product by its ID.
 func (a *App) GetProduct(id int) (*models.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("GetProduct failed: %v", err))
@@ -181,6 +183,7 @@ func (a *App) GetProduct(id int) (*models.Product, error) {
 	return a.productService.GetProductByID(id)
 }
 
+// GetAllProducts retrieves all products with pagination.
 func (a *App) GetAllProducts(params dto.PaginationDTO) (*dto.PaginationResponse, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("GetAllProducts failed: %v", err))
@@ -189,6 +192,7 @@ func (a *App) GetAllProducts(params dto.PaginationDTO) (*dto.PaginationResponse,
 	return a.productService.GetAllProducts(params)
 }
 
+// UpdateProduct updates an existing product with new name and price.
 func (a *App) UpdateProduct(id int, name string, price float64) (*models.Product, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("UpdateProduct failed: %v", err))
@@ -197,6 +201,7 @@ func (a *App) UpdateProduct(id int, name string, price float64) (*models.Product
 	return a.productService.UpdateProduct(id, name, price)
 }
 
+// DeleteProduct removes a product by its ID.
 func (a *App) DeleteProduct(id int) error {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("DeleteProduct failed: %v", err))

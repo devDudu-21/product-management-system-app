@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"product-management-app/core/dto"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type CurrencyService struct {
@@ -97,7 +99,11 @@ func (cs *CurrencyService) fetchFromURL(url string) (map[string]float64, error) 
 	if err != nil {
 		return nil, fmt.Errorf("HTTP request failed: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			runtime.LogError(cs.ctx, fmt.Sprintf("Failed to close response body: %v", err))
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API returned status code: %d", resp.StatusCode)

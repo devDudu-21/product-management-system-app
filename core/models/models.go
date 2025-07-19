@@ -1,5 +1,7 @@
+// Package models contains the data models for the product management application.
 package models
 
+// Product represents a product in the inventory management system.
 type Product struct {
 	ID          int     `json:"id"`
 	Name        string  `json:"name"`
