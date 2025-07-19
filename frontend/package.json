@@ -25,14 +25,14 @@
     "i18next-browser-languagedetector": "^8.2.0",
     "lucide-react": "^0.252.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "^19.1.0",
     "react-i18next": "^15.6.0",
     "tailwind-merge": "^1.13.2",
     "tailwindcss-animate": "^1.0.6"
   },
   "devDependencies": {
     "@types/react": "^18.0.37",
-    "@types/react-dom": "^18.0.11",
+    "@types/react-dom": "^19.1.6",
     "@typescript-eslint/eslint-plugin": "^8.36.0",
     "@typescript-eslint/parser": "^8.36.0",
     "@vitejs/plugin-react": "^4.6.0",
