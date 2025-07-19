@@ -1,7 +1,7 @@
 # Product Management System
 
 [![Wails](https://img.shields.io/badge/Wails-v2.10.2-blue?style=flat-square)](https://wails.io)
-[![Go](https://img.shields.io/badge/Go-1.22.0+-00ADD8?style=flat-square&logo=go)](https://golang.org)
+[![Go](https://img.shields.io/badge/Go-1.23.0+-00ADD8?style=flat-square&logo=go)](https://golang.org)
 [![React](https://img.shields.io/badge/React-18.2.0-61DAFB?style=flat-square&logo=react)](https://reactjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0.2-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.1.8-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com)
