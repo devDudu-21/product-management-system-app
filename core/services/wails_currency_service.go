@@ -29,22 +29,6 @@ func (wcs *WailsCurrencyService) logInfo(message string) {
 	}
 }
 
-func (wcs *WailsCurrencyService) logWarning(message string) {
-	if wcs.ctx != nil {
-		runtime.LogWarning(wcs.ctx, message)
-	} else {
-		log.Printf("WARNING: %s", message)
-	}
-}
-
-func (wcs *WailsCurrencyService) logError(message string) {
-	if wcs.ctx != nil {
-		runtime.LogError(wcs.ctx, message)
-	} else {
-		log.Printf("ERROR: %s", message)
-	}
-}
-
 func (wcs *WailsCurrencyService) ConvertCurrency(request dto.CurrencyConversionRequest) (*dto.CurrencyConversionResponse, error) {
 	wcs.logInfo("Converting " + request.FromCurrency + " to " + request.ToCurrency)
 	return wcs.CurrencyService.ConvertCurrency(request)

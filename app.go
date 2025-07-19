@@ -270,7 +270,7 @@ func (a *App) SaveExportedCSV(includeAll bool, productIDs []int) error {
 		return fmt.Errorf("operation cancelled by user")
 	}
 
-	err = os.WriteFile(filePath, data, 0644)
+	err = os.WriteFile(filePath, data, 0600)
 	if err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedCSV write error: %v", err))
 		return fmt.Errorf("error saving file: %v", err)
@@ -313,7 +313,7 @@ func (a *App) SaveExportedXLSX(includeAll bool, productIDs []int) error {
 		return fmt.Errorf("operation cancelled by user")
 	}
 
-	err = os.WriteFile(filePath, data, 0644)
+	err = os.WriteFile(filePath, data, 0600)
 	if err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("SaveExportedXLSX write error: %v", err))
 		return fmt.Errorf("error saving file: %v", err)
@@ -346,7 +346,7 @@ func (a *App) SaveImportTemplate() error {
 		return fmt.Errorf("operation cancelled by user")
 	}
 
-	err = os.WriteFile(filePath, []byte(template), 0644)
+	err = os.WriteFile(filePath, []byte(template), 0600)
 	if err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("SaveImportTemplate write error: %v", err))
 		return fmt.Errorf("error saving template: %v", err)

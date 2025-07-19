@@ -16,19 +16,43 @@ func TestXLSXImportWithBase64(t *testing.T) {
 		}
 	}()
 
-	f.SetCellValue("Sheet1", "A1", "Name")
-	f.SetCellValue("Sheet1", "B1", "Price")
-	f.SetCellValue("Sheet1", "C1", "Category")
-	f.SetCellValue("Sheet1", "D1", "Stock")
-	f.SetCellValue("Sheet1", "E1", "Description")
-	f.SetCellValue("Sheet1", "F1", "Image URL")
+	if err := f.SetCellValue("Sheet1", "A1", "Name"); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
+	if err := f.SetCellValue("Sheet1", "B1", "Price"); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
+	if err := f.SetCellValue("Sheet1", "C1", "Category"); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
+	if err := f.SetCellValue("Sheet1", "D1", "Stock"); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
+	if err := f.SetCellValue("Sheet1", "E1", "Description"); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
+	if err := f.SetCellValue("Sheet1", "F1", "Image URL"); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
 
-	f.SetCellValue("Sheet1", "A2", "Test Product")
-	f.SetCellValue("Sheet1", "B2", 29.99)
-	f.SetCellValue("Sheet1", "C2", "Electronics")
-	f.SetCellValue("Sheet1", "D2", 10)
-	f.SetCellValue("Sheet1", "E2", "Test description")
-	f.SetCellValue("Sheet1", "F2", "https://example.com/image.jpg")
+	if err := f.SetCellValue("Sheet1", "A2", "Test Product"); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
+	if err := f.SetCellValue("Sheet1", "B2", 29.99); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
+	if err := f.SetCellValue("Sheet1", "C2", "Electronics"); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
+	if err := f.SetCellValue("Sheet1", "D2", 10); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
+	if err := f.SetCellValue("Sheet1", "E2", "Test description"); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
+	if err := f.SetCellValue("Sheet1", "F2", "https://example.com/image.jpg"); err != nil {
+		t.Fatalf("Failed to set cell value: %v", err)
+	}
 
 	var buf bytes.Buffer
 	if err := f.Write(&buf); err != nil {

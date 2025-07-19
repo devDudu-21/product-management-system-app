@@ -91,26 +91,48 @@ func (s *ImportExportService) ExportToXLSX(request dto.ExportRequest) ([]byte, e
 	headers := []string{"ID", "Name", "Price", "Category", "Stock", "Description", "Image URL", "Created At", "Updated At"}
 	for i, header := range headers {
 		cell := fmt.Sprintf("%s1", string(rune('A'+i)))
-		f.SetCellValue(sheetName, cell, header)
+		if err := f.SetCellValue(sheetName, cell, header); err != nil {
+			return nil, fmt.Errorf("failed to set header cell %s: %w", cell, err)
+		}
 	}
 
 	for rowIndex, product := range products {
 		exportDTO := dto.NewProductExportDTO(product)
 		row := rowIndex + 2
 
-		f.SetCellValue(sheetName, fmt.Sprintf("A%d", row), exportDTO.ID)
-		f.SetCellValue(sheetName, fmt.Sprintf("B%d", row), exportDTO.Name)
-		f.SetCellValue(sheetName, fmt.Sprintf("C%d", row), exportDTO.Price)
-		f.SetCellValue(sheetName, fmt.Sprintf("D%d", row), exportDTO.Category)
-		f.SetCellValue(sheetName, fmt.Sprintf("E%d", row), exportDTO.Stock)
-		f.SetCellValue(sheetName, fmt.Sprintf("F%d", row), exportDTO.Description)
-		f.SetCellValue(sheetName, fmt.Sprintf("G%d", row), exportDTO.ImageURL)
-		f.SetCellValue(sheetName, fmt.Sprintf("H%d", row), exportDTO.CreatedAt)
-		f.SetCellValue(sheetName, fmt.Sprintf("I%d", row), exportDTO.UpdatedAt)
+		if err := f.SetCellValue(sheetName, fmt.Sprintf("A%d", row), exportDTO.ID); err != nil {
+			return nil, fmt.Errorf("failed to set cell A%d: %w", row, err)
+		}
+		if err := f.SetCellValue(sheetName, fmt.Sprintf("B%d", row), exportDTO.Name); err != nil {
+			return nil, fmt.Errorf("failed to set cell B%d: %w", row, err)
+		}
+		if err := f.SetCellValue(sheetName, fmt.Sprintf("C%d", row), exportDTO.Price); err != nil {
+			return nil, fmt.Errorf("failed to set cell C%d: %w", row, err)
+		}
+		if err := f.SetCellValue(sheetName, fmt.Sprintf("D%d", row), exportDTO.Category); err != nil {
+			return nil, fmt.Errorf("failed to set cell D%d: %w", row, err)
+		}
+		if err := f.SetCellValue(sheetName, fmt.Sprintf("E%d", row), exportDTO.Stock); err != nil {
+			return nil, fmt.Errorf("failed to set cell E%d: %w", row, err)
+		}
+		if err := f.SetCellValue(sheetName, fmt.Sprintf("F%d", row), exportDTO.Description); err != nil {
+			return nil, fmt.Errorf("failed to set cell F%d: %w", row, err)
+		}
+		if err := f.SetCellValue(sheetName, fmt.Sprintf("G%d", row), exportDTO.ImageURL); err != nil {
+			return nil, fmt.Errorf("failed to set cell G%d: %w", row, err)
+		}
+		if err := f.SetCellValue(sheetName, fmt.Sprintf("H%d", row), exportDTO.CreatedAt); err != nil {
+			return nil, fmt.Errorf("failed to set cell H%d: %w", row, err)
+		}
+		if err := f.SetCellValue(sheetName, fmt.Sprintf("I%d", row), exportDTO.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("failed to set cell I%d: %w", row, err)
+		}
 	}
 
 	f.SetActiveSheet(index)
-	f.DeleteSheet("Sheet1")
+	if err := f.DeleteSheet("Sheet1"); err != nil {
+		runtime.LogWarning(s.ctx, fmt.Sprintf("Failed to delete default sheet: %v", err))
+	}
 
 	var buf bytes.Buffer
 	if err := f.Write(&buf); err != nil {

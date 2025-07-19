@@ -144,7 +144,10 @@ func (r *ProductRepository) GetAll(params dto.PaginationDTO) (*dto.PaginationRes
 	}
 
 	totalCount := 0
-	r.db.QueryRow("SELECT COUNT(*) FROM products").Scan(&totalCount)
+	err = r.db.QueryRow("SELECT COUNT(*) FROM products").Scan(&totalCount)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get total count: %w", err)
+	}
 	totalPages := (totalCount + params.PageSize - 1) / params.PageSize
 
 	return &dto.PaginationResponse{
