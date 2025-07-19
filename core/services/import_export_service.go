@@ -21,7 +21,7 @@ type ImportExportService struct {
 	ctx         context.Context
 }
 
-func NewImportExportService(productRepo *repositories.ProductRepository, ctx context.Context) *ImportExportService {
+func NewImportExportService(ctx context.Context, productRepo *repositories.ProductRepository) *ImportExportService {
 	return &ImportExportService{
 		productRepo: productRepo,
 		ctx:         ctx,

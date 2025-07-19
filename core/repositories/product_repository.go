@@ -1,3 +1,4 @@
+// Package repositories contains data access layer implementations for the product management application.
 package repositories
 
 import (
@@ -8,19 +9,22 @@ import (
 	"product-management-app/core/dto"
 	"product-management-app/core/models"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // SQLite driver
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+// ProductRepository handles database operations for products.
 type ProductRepository struct {
 	db  *sql.DB
 	ctx context.Context
 }
 
-func NewProductRepository(db *sql.DB, ctx context.Context) *ProductRepository {
+// NewProductRepository creates a new ProductRepository instance.
+func NewProductRepository(ctx context.Context, db *sql.DB) *ProductRepository {
 	return &ProductRepository{db: db, ctx: ctx}
 }
 
+// Create creates a new product in the database.
 func (r *ProductRepository) Create(createProductDTO dto.CreateProductDTO) (*models.Product, error) {
 	res, err := r.db.Exec("INSERT INTO products(name, price, category, stock, description, image_url) VALUES(?, ?, ?, ?, ?, ?)", createProductDTO.Name, createProductDTO.Price, createProductDTO.Category, createProductDTO.Stock, createProductDTO.Description, createProductDTO.ImageURL)
 	if err != nil {
@@ -53,6 +57,7 @@ func (r *ProductRepository) Create(createProductDTO dto.CreateProductDTO) (*mode
 	return product, nil
 }
 
+// GetByID retrieves a product by its ID.
 func (r *ProductRepository) GetByID(id int) (*models.Product, error) {
 	var category, description, imageURL, updatedAt sql.NullString
 	var createdAt string
@@ -99,13 +104,18 @@ func (r *ProductRepository) GetByID(id int) (*models.Product, error) {
 	return product, nil
 }
 
+// GetAll retrieves all products with pagination.
 func (r *ProductRepository) GetAll(params dto.PaginationDTO) (*dto.PaginationResponse, error) {
 	offset := (params.Page - 1) * params.PageSize
 	rows, err := r.db.Query("SELECT id, name, price, category, stock, description, image_url, created_at, updated_at FROM products LIMIT ? OFFSET ?", params.PageSize, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch products: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			runtime.LogError(r.ctx, fmt.Sprintf("Failed to close rows: %v", err))
+		}
+	}()
 
 	products := []*models.Product{}
 	for rows.Next() {
@@ -159,6 +169,7 @@ func (r *ProductRepository) GetAll(params dto.PaginationDTO) (*dto.PaginationRes
 	}, nil
 }
 
+// Update updates an existing product.
 func (r *ProductRepository) Update(id int, name string, price float64) (*models.Product, error) {
 	currentProduct, err := r.GetByID(id)
 	if err != nil {
@@ -191,6 +202,7 @@ func (r *ProductRepository) Update(id int, name string, price float64) (*models.
 	return currentProduct, nil
 }
 
+// Delete removes a product from the database.
 func (r *ProductRepository) Delete(id int) error {
 	res, err := r.db.Exec("DELETE FROM products WHERE id = ?", id)
 	if err != nil {

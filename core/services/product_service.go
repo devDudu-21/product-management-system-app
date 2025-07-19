@@ -32,8 +32,8 @@ func (s *ProductService) InitDatabase() error {
 	if err := s.db.InitDatabase(); err != nil {
 		return err
 	}
-	s.repo = repositories.NewProductRepository(s.db.DB, s.ctx)
-	s.importExportService = NewImportExportService(s.repo, s.ctx)
+	s.repo = repositories.NewProductRepository(s.ctx, s.db.DB)
+	s.importExportService = NewImportExportService(s.ctx, s.repo)
 	return nil
 }
 

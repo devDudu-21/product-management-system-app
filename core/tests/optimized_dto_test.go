@@ -30,7 +30,7 @@ func TestOptimizedDTOs(t *testing.T) {
 		t.Errorf("Incorrect stock: expected 10, got %d", createDTO.Stock)
 	}
 
-	if importDTO.CreateProductDTO.Name != createDTO.Name {
+	if importDTO.Name != createDTO.Name {
 		t.Error("ProductImportDTO is not reusing CreateProductDTO correctly")
 	}
 }
