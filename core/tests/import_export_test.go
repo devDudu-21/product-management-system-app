@@ -9,7 +9,7 @@ import (
 
 func TestImportExportBasicFunctionality(t *testing.T) {
 	csvData := "Name,Price,Category,Stock\nTest Product,29.99,Electronics,10"
-	
+
 	lines := strings.Split(csvData, "\n")
 	if len(lines) != 2 {
 		t.Errorf("Expected 2 lines, got %d", len(lines))

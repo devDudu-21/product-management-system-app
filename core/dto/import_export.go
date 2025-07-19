@@ -3,10 +3,10 @@ package dto
 import "product-management-app/core/models"
 
 type ImportResult struct {
-	SuccessCount   int                  `json:"successCount"`
-	ErrorCount     int                  `json:"errorCount"`
-	Errors         []ImportError        `json:"errors,omitempty"`
-	ImportedItems  []*models.Product    `json:"importedItems,omitempty"`
+	SuccessCount  int               `json:"successCount"`
+	ErrorCount    int               `json:"errorCount"`
+	Errors        []ImportError     `json:"errors,omitempty"`
+	ImportedItems []*models.Product `json:"importedItems,omitempty"`
 }
 
 type ImportError struct {
@@ -70,22 +70,22 @@ func NewProductExportDTO(product *models.Product) *ProductExportDTO {
 		Stock:     product.Stock,
 		CreatedAt: product.CreatedAt,
 	}
-	
+
 	if product.Category != nil {
 		dto.Category = *product.Category
 	}
-	
+
 	if product.Description != nil {
 		dto.Description = *product.Description
 	}
-	
+
 	if product.ImageURL != nil {
 		dto.ImageURL = *product.ImageURL
 	}
-	
+
 	if product.UpdatedAt != nil {
 		dto.UpdatedAt = *product.UpdatedAt
 	}
-	
+
 	return dto
 }

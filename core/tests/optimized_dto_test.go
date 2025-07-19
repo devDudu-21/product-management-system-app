@@ -17,15 +17,15 @@ func TestOptimizedDTOs(t *testing.T) {
 	)
 
 	createDTO := importDTO.ToCreateProductDTO()
-	
+
 	if createDTO.Name != "Test Product" {
 		t.Errorf("Incorrect name: expected 'Test Product', got '%s'", createDTO.Name)
 	}
-	
+
 	if createDTO.Price != 99.99 {
 		t.Errorf("Incorrect price: expected 99.99, got %f", createDTO.Price)
 	}
-	
+
 	if createDTO.Stock != 10 {
 		t.Errorf("Incorrect stock: expected 10, got %d", createDTO.Stock)
 	}

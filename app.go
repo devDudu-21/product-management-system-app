@@ -17,10 +17,11 @@ import (
 
 // App struct
 type App struct {
-	ctx            context.Context
-	productService *service.ProductService
-	dbHealthy      bool
-	dbError        string
+	ctx             context.Context
+	productService  *service.ProductService
+	currencyService *service.WailsCurrencyService
+	dbHealthy       bool
+	dbError         string
 }
 
 // NewApp creates a new App application struct
@@ -34,6 +35,10 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	a.productService = service.NewProductService()
 	a.productService.SetContext(ctx)
+
+	// Initialize currency service
+	a.currencyService = service.NewWailsCurrencyService(ctx)
+	runtime.LogInfo(a.ctx, "Currency service initialized successfully")
 
 	maxRetries := 3
 	retryDelay := time.Second * 2
@@ -172,18 +177,17 @@ func (a *App) DeleteProduct(id int) error {
 	return a.productService.DeleteProduct(id)
 }
 
-
 func (a *App) ExportProductsToCSV(includeAll bool, productIDs []int) (string, error) {
 	if err := a.checkDatabaseHealth(); err != nil {
 		runtime.LogError(a.ctx, fmt.Sprintf("ExportProductsToCSV failed: %v", err))
 		return "", err
 	}
-	
+
 	data, err := a.productService.ExportProductsToCSV(includeAll, productIDs)
 	if err != nil {
 		return "", err
 	}
-	
+
 	return string(data), nil
 }
 
@@ -192,12 +196,12 @@ func (a *App) ExportProductsToXLSX(includeAll bool, productIDs []int) (string, e
 		runtime.LogError(a.ctx, fmt.Sprintf("ExportProductsToXLSX failed: %v", err))
 		return "", err
 	}
-	
+
 	data, err := a.productService.ExportProductsToXLSX(includeAll, productIDs)
 	if err != nil {
 		return "", err
 	}
-	
+
 	return string(data), nil
 }
 
@@ -206,7 +210,7 @@ func (a *App) ImportProductsFromCSV(csvData string) (*dto.ImportResult, error) {
 		runtime.LogError(a.ctx, fmt.Sprintf("ImportProductsFromCSV failed: %v", err))
 		return nil, err
 	}
-	
+
 	return a.productService.ImportProductsFromCSV([]byte(csvData))
 }
 
@@ -221,7 +225,7 @@ func (a *App) ImportProductsFromXLSX(xlsxData string) (*dto.ImportResult, error)
 		runtime.LogError(a.ctx, fmt.Sprintf("Failed to decode XLSX base64 data: %v", err))
 		return nil, fmt.Errorf("invalid XLSX data format: %v", err)
 	}
-	
+
 	return a.productService.ImportProductsFromXLSX(data)
 }
 
@@ -229,7 +233,7 @@ func (a *App) GetImportTemplate() string {
 	template := "Name,Price,Category,Stock,Description,Image URL\n"
 	template += "Example Product,29.99,Electronics,10,Example product description,https://example.com/image.jpg\n"
 	template += "Another Product,49.90,Home & Garden,5,Another example product,\n"
-	
+
 	return template
 }
 
@@ -350,4 +354,28 @@ func (a *App) SaveImportTemplate() error {
 
 	runtime.LogInfo(a.ctx, fmt.Sprintf("Template saved successfully to: %s", filePath))
 	return nil
+}
+
+// ConvertCurrency converts an amount from one currency to another
+func (a *App) ConvertCurrency(request dto.CurrencyConversionRequest) (*dto.CurrencyConversionResponse, error) {
+	runtime.LogInfo(a.ctx, fmt.Sprintf("ConvertCurrency called: %.2f %s to %s", request.Amount, request.FromCurrency, request.ToCurrency))
+	return a.currencyService.ConvertCurrency(request)
+}
+
+// GetSupportedCurrencies returns the list of supported currencies
+func (a *App) GetSupportedCurrencies() *dto.SupportedCurrenciesResponse {
+	runtime.LogInfo(a.ctx, "GetSupportedCurrencies called")
+	return a.currencyService.GetSupportedCurrencies()
+}
+
+// GetExchangeRatesForCurrency returns all exchange rates for a base currency
+func (a *App) GetExchangeRatesForCurrency(baseCurrency string) (*dto.CurrencyRatesResponse, error) {
+	runtime.LogInfo(a.ctx, fmt.Sprintf("GetExchangeRatesForCurrency called for: %s", baseCurrency))
+	return a.currencyService.GetExchangeRatesForCurrency(baseCurrency)
+}
+
+// ClearCurrencyCache clears the currency exchange rates cache
+func (a *App) ClearCurrencyCache() {
+	runtime.LogInfo(a.ctx, "ClearCurrencyCache called")
+	a.currencyService.ClearCache()
 }

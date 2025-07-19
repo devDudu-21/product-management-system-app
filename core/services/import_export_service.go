@@ -96,7 +96,7 @@ func (s *ImportExportService) ExportToXLSX(request dto.ExportRequest) ([]byte, e
 
 	for rowIndex, product := range products {
 		exportDTO := dto.NewProductExportDTO(product)
-		row := rowIndex + 2 
+		row := rowIndex + 2
 
 		f.SetCellValue(sheetName, fmt.Sprintf("A%d", row), exportDTO.ID)
 		f.SetCellValue(sheetName, fmt.Sprintf("B%d", row), exportDTO.Name)
@@ -110,7 +110,7 @@ func (s *ImportExportService) ExportToXLSX(request dto.ExportRequest) ([]byte, e
 	}
 
 	f.SetActiveSheet(index)
-	f.DeleteSheet("Sheet1") 
+	f.DeleteSheet("Sheet1")
 
 	var buf bytes.Buffer
 	if err := f.Write(&buf); err != nil {
@@ -144,7 +144,7 @@ func (s *ImportExportService) ImportFromCSV(data []byte) (*dto.ImportResult, err
 	}
 
 	for i, record := range records[1:] {
-		rowNum := i + 2 
+		rowNum := i + 2
 
 		productDTO, errs := s.parseCSVRecord(record, rowNum)
 		if len(errs) > 0 {
@@ -186,7 +186,7 @@ func (s *ImportExportService) ImportFromXLSX(data []byte) (*dto.ImportResult, er
 
 	// Log the first few bytes for debugging
 	runtime.LogInfo(s.ctx, fmt.Sprintf("Opening XLSX file, size: %d bytes", len(data)))
-	
+
 	f, err := excelize.OpenReader(bytes.NewReader(data))
 	if err != nil {
 		runtime.LogError(s.ctx, fmt.Sprintf("Failed to open XLSX: %v", err))
@@ -215,7 +215,7 @@ func (s *ImportExportService) ImportFromXLSX(data []byte) (*dto.ImportResult, er
 		}, nil
 	}
 
-	sheetName := sheets[0] 
+	sheetName := sheets[0]
 	rows, err := f.GetRows(sheetName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get rows: %w", err)
@@ -237,7 +237,7 @@ func (s *ImportExportService) ImportFromXLSX(data []byte) (*dto.ImportResult, er
 	}
 
 	for i, row := range rows[1:] {
-		rowNum := i + 2 
+		rowNum := i + 2
 
 		productDTO, errs := s.parseXLSXRow(row, rowNum)
 		if len(errs) > 0 {
@@ -267,7 +267,7 @@ func (s *ImportExportService) ImportFromXLSX(data []byte) (*dto.ImportResult, er
 
 func (s *ImportExportService) getProductsForExport(request dto.ExportRequest) ([]*models.Product, error) {
 	if request.IncludeAll {
-		pagination := dto.PaginationDTO{Page: 1, PageSize: 10000} 
+		pagination := dto.PaginationDTO{Page: 1, PageSize: 10000}
 		response, err := s.productRepo.GetAll(pagination)
 		if err != nil {
 			return nil, err

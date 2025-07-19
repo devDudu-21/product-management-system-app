@@ -12,9 +12,9 @@ import (
 )
 
 type ProductService struct {
-	repo               *repositories.ProductRepository
-	ctx                context.Context
-	db                 *DatabaseService
+	repo                *repositories.ProductRepository
+	ctx                 context.Context
+	db                  *DatabaseService
 	importExportService *ImportExportService
 }
 
@@ -93,20 +93,19 @@ func (s *ProductService) DeleteProduct(id int) error {
 	return nil
 }
 
-
 func (s *ProductService) ExportProductsToCSV(includeAll bool, productIDs []int) ([]byte, error) {
 	request := dto.ExportRequest{
 		Format:     dto.FormatCSV,
 		IncludeAll: includeAll,
 		ProductIDs: productIDs,
 	}
-	
+
 	data, err := s.importExportService.ExportToCSV(request)
 	if err != nil {
 		runtime.LogError(s.ctx, fmt.Sprintf("Failed to export products to CSV: %v", err))
 		return nil, err
 	}
-	
+
 	runtime.LogInfo(s.ctx, "Products exported to CSV successfully")
 	return data, nil
 }
@@ -117,13 +116,13 @@ func (s *ProductService) ExportProductsToXLSX(includeAll bool, productIDs []int)
 		IncludeAll: includeAll,
 		ProductIDs: productIDs,
 	}
-	
+
 	data, err := s.importExportService.ExportToXLSX(request)
 	if err != nil {
 		runtime.LogError(s.ctx, fmt.Sprintf("Failed to export products to XLSX: %v", err))
 		return nil, err
 	}
-	
+
 	runtime.LogInfo(s.ctx, "Products exported to XLSX successfully")
 	return data, nil
 }
@@ -134,7 +133,7 @@ func (s *ProductService) ImportProductsFromCSV(data []byte) (*dto.ImportResult, 
 		runtime.LogError(s.ctx, fmt.Sprintf("Failed to import products from CSV: %v", err))
 		return nil, err
 	}
-	
+
 	runtime.LogInfo(s.ctx, fmt.Sprintf("CSV import completed: %d success, %d errors", result.SuccessCount, result.ErrorCount))
 	return result, nil
 }
@@ -145,7 +144,7 @@ func (s *ProductService) ImportProductsFromXLSX(data []byte) (*dto.ImportResult,
 		runtime.LogError(s.ctx, fmt.Sprintf("Failed to import products from XLSX: %v", err))
 		return nil, err
 	}
-	
+
 	runtime.LogInfo(s.ctx, fmt.Sprintf("XLSX import completed: %d success, %d errors", result.SuccessCount, result.ErrorCount))
 	return result, nil
 }

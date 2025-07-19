@@ -46,7 +46,7 @@ func TestXLSXImportWithBase64(t *testing.T) {
 		t.Error("Base64 encode/decode cycle failed")
 	}
 
-	t.Logf("XLSX base64 encoding/decoding test passed. Original size: %d bytes, Base64 size: %d chars", 
+	t.Logf("XLSX base64 encoding/decoding test passed. Original size: %d bytes, Base64 size: %d chars",
 		len(buf.Bytes()), len(base64Data))
 }
 
@@ -54,7 +54,7 @@ func TestXLSXImportIntegration(t *testing.T) {
 	// This test would require setting up a full service with database
 	// For now, just verify that base64 decoding works
 	base64TestData := "UEsDBBQAAAAIAAAQIwAAAAAAAAAAAAAAAREAAAEeAAAAeGwvd29ya3NoZWV0cy9zaGVldDEueG1s"
-	
+
 	_, err := base64.StdEncoding.DecodeString(base64TestData)
 	if err != nil {
 		t.Errorf("Failed to decode sample base64 data: %v", err)

@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
-)
 
+	"product-management-app/core/dto"
+	service "product-management-app/core/services"
+)
 
 func ExampleUsage() {
 	fmt.Println("=== FUNCTIONALITY USAGE EXAMPLES ===")
@@ -56,8 +59,58 @@ Wireless Mouse,89.90,Accessories,100,Optical wireless mouse,`)
 	fmt.Println()
 
 	fmt.Println("=== BACKEND READY FOR INTEGRATION ===")
+
+	fmt.Println()
+	fmt.Println("=== CURRENCY CONVERSION SERVICE DEMONSTRATION ===")
+	demonstrateCurrencyService()
 }
 
+func demonstrateCurrencyService() {
+	currencyService := service.NewCurrencyService(context.TODO())
+
+	fmt.Println("\n1. Supported Currencies:")
+	supportedCurrencies := currencyService.GetSupportedCurrencies()
+	for _, currency := range supportedCurrencies.Currencies {
+		fmt.Printf("   %s (%s) - %s\n", currency.Code, currency.Symbol, currency.Name)
+	}
+
+	fmt.Println("\n2. Conversion Examples:")
+
+	conversions := []dto.CurrencyConversionRequest{
+		{Amount: 100, FromCurrency: "USD", ToCurrency: "BRL"},
+		{Amount: 50, FromCurrency: "EUR", ToCurrency: "USD"},
+		{Amount: 1000, FromCurrency: "BRL", ToCurrency: "EUR"},
+	}
+
+	for _, conversion := range conversions {
+		result, err := currencyService.ConvertCurrency(conversion)
+		if err != nil {
+			log.Printf("   Error converting %.2f %s to %s: %v\n",
+				conversion.Amount, conversion.FromCurrency, conversion.ToCurrency, err)
+			continue
+		}
+
+		fmt.Printf("   %.2f %s = %.2f %s (Rate: %.6f)\n",
+			result.Amount, result.FromCurrency,
+			result.ConvertedAmount, result.ToCurrency,
+			result.ExchangeRate)
+	}
+
+	fmt.Println("\n3. Same Currency Conversion (should return rate 1.0):")
+	sameCurrencyTest, err := currencyService.ConvertCurrency(dto.CurrencyConversionRequest{
+		Amount: 100, FromCurrency: "USD", ToCurrency: "USD",
+	})
+	if err != nil {
+		log.Printf("   Error: %v\n", err)
+	} else {
+		fmt.Printf("   %.2f %s = %.2f %s (Rate: %.1f)\n",
+			sameCurrencyTest.Amount, sameCurrencyTest.FromCurrency,
+			sameCurrencyTest.ConvertedAmount, sameCurrencyTest.ToCurrency,
+			sameCurrencyTest.ExchangeRate)
+	}
+
+	fmt.Println("\n=== DEMONSTRATION COMPLETED ===")
+}
 
 func main() {
 	log.Println("Demonstration of import and export functionalities")
