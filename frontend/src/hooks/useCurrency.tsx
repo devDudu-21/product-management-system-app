@@ -186,7 +186,7 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
 
   const exchangeRates = useMemo(() => {
     return currencyService.getExchangeRates();
-  }, [currencyService, lastUpdated]);
+  }, [currencyService]);
 
   const value: CurrencyContextType = useMemo(
     () => ({

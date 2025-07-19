@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   DollarSign,
   ChevronDown,
@@ -54,7 +54,7 @@ export function CurrencySelector() {
     if (currencies.length > 0 && (isOpen || Object.keys(rates).length === 0)) {
       loadRates();
     }
-  }, [currencies, convertCurrency, isOpen, exchangeRates]);
+  }, [currencies, convertCurrency, isOpen, exchangeRates, rates]);
 
   const handleCurrencyChange = (currencyCode: string) => {
     setCurrency(currencyCode);

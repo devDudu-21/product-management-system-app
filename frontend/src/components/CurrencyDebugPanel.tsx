@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CurrencyService } from "../services/currencyService";
 import { BarChart3, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
@@ -19,13 +19,13 @@ export function CurrencyDebugPanel() {
 
   const currencyService = CurrencyService.getInstance();
 
-  const loadStats = () => {
+  const loadStats = useCallback(() => {
     const cacheStats = currencyService.getCacheStats();
     const rates = currencyService.getExchangeRates();
 
     setStats(cacheStats);
     setExchangeRates(rates);
-  };
+  }, [currencyService]);
 
   useEffect(() => {
     if (isOpen) {
@@ -33,7 +33,7 @@ export function CurrencyDebugPanel() {
       const interval = setInterval(loadStats, 2000);
       return () => clearInterval(interval);
     }
-  }, [isOpen]);
+  }, [isOpen, loadStats]);
 
   if (import.meta.env.PROD) {
     return null;
