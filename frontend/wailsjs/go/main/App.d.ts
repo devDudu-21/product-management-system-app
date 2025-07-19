@@ -3,6 +3,10 @@
 import {dto} from '../models';
 import {models} from '../models';
 
+export function ClearCurrencyCache():Promise<void>;
+
+export function ConvertCurrency(arg1:dto.CurrencyConversionRequest):Promise<dto.CurrencyConversionResponse>;
+
 export function CreateProduct(arg1:dto.CreateProductDTO):Promise<models.Product>;
 
 export function DeleteProduct(arg1:number):Promise<void>;
@@ -15,9 +19,13 @@ export function GetAllProducts(arg1:dto.PaginationDTO):Promise<dto.PaginationRes
 
 export function GetDatabaseStatus():Promise<Record<string, any>>;
 
+export function GetExchangeRatesForCurrency(arg1:string):Promise<dto.CurrencyRatesResponse>;
+
 export function GetImportTemplate():Promise<string>;
 
 export function GetProduct(arg1:number):Promise<models.Product>;
+
+export function GetSupportedCurrencies():Promise<dto.SupportedCurrenciesResponse>;
 
 export function Greet(arg1:string):Promise<string>;
 

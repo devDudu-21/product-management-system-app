@@ -1,3 +1,11 @@
+import {
+  ConvertCurrency,
+  GetSupportedCurrencies,
+  GetExchangeRatesForCurrency,
+  ClearCurrencyCache,
+} from "../../wailsjs/go/main/App";
+import { CurrencyConversionCache } from "../utils/currencyCache";
+
 export interface ExchangeRates {
   [currency: string]: number;
 }
@@ -9,37 +17,17 @@ export interface CurrencyConfig {
   rate: number; // currency conversion rate relative to BRL
 }
 
-export const SUPPORTED_CURRENCIES: Record<string, CurrencyConfig> = {
-  BRL: {
-    code: "BRL",
-    symbol: "R$",
-    name: "Real Brasileiro",
-    rate: 1.0, // base currency
-  },
-  USD: {
-    code: "USD",
-    symbol: "$",
-    name: "US Dollar",
-    rate: 0.2, // approximately 1 BRL = 0.2 USD (fixed rate for demo)
-  },
-  EUR: {
-    code: "EUR",
-    symbol: "€",
-    name: "Euro",
-    rate: 0.18, // approximately 1 BRL = 0.18 EUR (fixed rate for demo)
-  },
-};
-
 export class CurrencyService {
   private static instance: CurrencyService;
+  private supportedCurrencies: CurrencyConfig[] = [];
   private exchangeRates: ExchangeRates = {};
+  private lastFetchTime: number = 0;
+  private readonly CACHE_DURATION = 30 * 60 * 1000;
+  private conversionCache: CurrencyConversionCache;
 
   private constructor() {
-    this.exchangeRates = {
-      BRL: 1.0,
-      USD: 0.2,
-      EUR: 0.18,
-    };
+    this.loadSupportedCurrencies();
+    this.conversionCache = CurrencyConversionCache.getInstance();
   }
 
   public static getInstance(): CurrencyService {
@@ -49,22 +37,182 @@ export class CurrencyService {
     return CurrencyService.instance;
   }
 
-  public convertFromBRL(amount: number, toCurrency: string): number {
-    const rate = this.exchangeRates[toCurrency];
-    if (!rate) {
-      console.warn(`Exchange rate not found for ${toCurrency}, using BRL`);
-      return amount;
+  private async loadSupportedCurrencies(): Promise<void> {
+    try {
+      const response = await GetSupportedCurrencies();
+      this.supportedCurrencies = response.currencies.map(currency => ({
+        code: currency.code,
+        symbol: currency.symbol,
+        name: currency.name,
+        rate: 1.0,
+      }));
+
+      await this.updateExchangeRatesFromBackend();
+    } catch (error) {
+      console.error("Error loading supported currencies:", error);
+      this.supportedCurrencies = [
+        { code: "BRL", symbol: "R$", name: "Real Brasileiro", rate: 1.0 },
+        { code: "USD", symbol: "$", name: "US Dollar", rate: 0.2 },
+        { code: "EUR", symbol: "€", name: "Euro", rate: 0.18 },
+      ];
     }
-    return amount * rate;
   }
 
-  public convertToBRL(amount: number, fromCurrency: string): number {
-    const rate = this.exchangeRates[fromCurrency];
-    if (!rate) {
-      console.warn(`Exchange rate not found for ${fromCurrency}, using BRL`);
+  private async updateExchangeRatesFromBackend(): Promise<void> {
+    try {
+      const response = await GetExchangeRatesForCurrency("BRL");
+      if (response.rates) {
+        this.exchangeRates = { BRL: 1.0, ...response.rates };
+
+        this.supportedCurrencies = this.supportedCurrencies.map(currency => ({
+          ...currency,
+          rate: this.exchangeRates[currency.code] || currency.rate,
+        }));
+
+        this.lastFetchTime = Date.now();
+      }
+    } catch (error) {
+      console.error("Error updating exchange rates:", error);
+    }
+  }
+
+  private async ensureRatesUpdated(): Promise<void> {
+    const now = Date.now();
+    if (now - this.lastFetchTime > this.CACHE_DURATION) {
+      await this.updateExchangeRatesFromBackend();
+    }
+  }
+
+  public async convertFromBRL(
+    amount: number,
+    toCurrency: string
+  ): Promise<number> {
+    if (toCurrency === "BRL") return amount;
+
+    const cacheKey = { amount, fromCurrency: "BRL", toCurrency };
+    const cachedResult = this.conversionCache.get(cacheKey);
+
+    if (cachedResult !== null) {
+      this.conversionCache.recordHit();
+      return cachedResult;
+    }
+
+    this.conversionCache.recordMiss();
+
+    try {
+      await this.ensureRatesUpdated();
+
+      const response = await ConvertCurrency({
+        amount,
+        fromCurrency: "BRL",
+        toCurrency,
+      });
+
+      this.conversionCache.set(
+        cacheKey,
+        response.convertedAmount,
+        response.exchangeRate
+      );
+
+      return response.convertedAmount;
+    } catch (error) {
+      console.error(`Error converting from BRL to ${toCurrency}:`, error);
+
+      const rate = this.exchangeRates[toCurrency];
+      if (rate) {
+        const result = amount * rate;
+        this.conversionCache.set(cacheKey, result, rate);
+        return result;
+      }
+
       return amount;
     }
-    return amount / rate;
+  }
+
+  public async convertToBRL(
+    amount: number,
+    fromCurrency: string
+  ): Promise<number> {
+    if (fromCurrency === "BRL") return amount;
+
+    const cacheKey = { amount, fromCurrency, toCurrency: "BRL" };
+    const cachedResult = this.conversionCache.get(cacheKey);
+
+    if (cachedResult !== null) {
+      this.conversionCache.recordHit();
+      return cachedResult;
+    }
+
+    this.conversionCache.recordMiss();
+
+    try {
+      await this.ensureRatesUpdated();
+
+      const response = await ConvertCurrency({
+        amount,
+        fromCurrency,
+        toCurrency: "BRL",
+      });
+
+      this.conversionCache.set(
+        cacheKey,
+        response.convertedAmount,
+        response.exchangeRate
+      );
+
+      return response.convertedAmount;
+    } catch (error) {
+      console.error(`Error converting from ${fromCurrency} to BRL:`, error);
+
+      const rate = this.exchangeRates[fromCurrency];
+      if (rate) {
+        const result = amount / rate;
+        this.conversionCache.set(cacheKey, result, 1 / rate);
+        return result;
+      }
+
+      return amount;
+    }
+  }
+
+  public async convertCurrency(
+    amount: number,
+    fromCurrency: string,
+    toCurrency: string
+  ): Promise<number> {
+    if (fromCurrency === toCurrency) return amount;
+
+    const cacheKey = { amount, fromCurrency, toCurrency };
+    const cachedResult = this.conversionCache.get(cacheKey);
+
+    if (cachedResult !== null) {
+      this.conversionCache.recordHit();
+      return cachedResult;
+    }
+
+    this.conversionCache.recordMiss();
+
+    try {
+      const response = await ConvertCurrency({
+        amount,
+        fromCurrency,
+        toCurrency,
+      });
+
+      this.conversionCache.set(
+        cacheKey,
+        response.convertedAmount,
+        response.exchangeRate
+      );
+
+      return response.convertedAmount;
+    } catch (error) {
+      console.error(
+        `Error converting from ${fromCurrency} to ${toCurrency}:`,
+        error
+      );
+      return amount;
+    }
   }
 
   public formatCurrency(
@@ -72,7 +220,7 @@ export class CurrencyService {
     currency: string,
     locale?: string
   ): string {
-    const config = SUPPORTED_CURRENCIES[currency];
+    const config = this.getCurrencyConfig(currency);
     if (!config) {
       return `${amount.toFixed(2)}`;
     }
@@ -81,6 +229,13 @@ export class CurrencyService {
       BRL: "pt-BR",
       USD: "en-US",
       EUR: "de-DE",
+      GBP: "en-GB",
+      JPY: "ja-JP",
+      CAD: "en-CA",
+      AUD: "en-AU",
+      CHF: "de-CH",
+      CNY: "zh-CN",
+      INR: "en-IN",
     };
 
     const targetLocale = locale || localeMap[currency] || "en-US";
@@ -95,15 +250,40 @@ export class CurrencyService {
     }
   }
 
-  public updateExchangeRates(rates: ExchangeRates): void {
-    this.exchangeRates = { ...this.exchangeRates, ...rates };
+  public async refreshExchangeRates(): Promise<void> {
+    try {
+      await ClearCurrencyCache();
+      this.conversionCache.clear();
+      await this.updateExchangeRatesFromBackend();
+    } catch (error) {
+      console.error("Error refreshing exchange rates:", error);
+    }
   }
 
   public getCurrencyConfig(currency: string): CurrencyConfig | null {
-    return SUPPORTED_CURRENCIES[currency] || null;
+    return this.supportedCurrencies.find(c => c.code === currency) || null;
   }
 
   public getSupportedCurrencies(): CurrencyConfig[] {
-    return Object.values(SUPPORTED_CURRENCIES);
+    return this.supportedCurrencies;
+  }
+
+  public getExchangeRates(): ExchangeRates {
+    return { ...this.exchangeRates };
+  }
+
+  public getCacheStats() {
+    return this.conversionCache.getStats();
+  }
+
+  public async preloadCommonConversions(): Promise<void> {
+    const currencies = this.supportedCurrencies.map(c => c.code);
+    const commonAmounts = [1, 10, 50, 100, 500, 1000];
+
+    await this.conversionCache.preloadCommonConversions(
+      commonAmounts,
+      currencies,
+      this.convertCurrency.bind(this)
+    );
   }
 }

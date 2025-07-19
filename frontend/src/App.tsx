@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { ProductList } from "./components/ProductList";
 import { LanguageSelector } from "./components/LanguageSelector";
 import { CurrencySelector } from "./components/CurrencySelector";
+import { CurrencyStatusIndicator } from "./components/CurrencyStatusIndicator";
+import { CurrencyDebugPanel } from "./components/CurrencyDebugPanel";
 import { CurrencyProvider } from "./hooks/useCurrency";
 
 function App() {
@@ -16,9 +18,12 @@ function App() {
       >
         <div className="max-w-7xl mx-auto">
           {/* Selectors */}
-          <div className="flex justify-end gap-3 mb-4">
-            <CurrencySelector />
-            <LanguageSelector />
+          <div className="flex justify-between items-center mb-4">
+            <CurrencyStatusIndicator compact />
+            <div className="flex gap-3">
+              <CurrencySelector />
+              <LanguageSelector />
+            </div>
           </div>
 
           <header className="text-center mb-8">
@@ -28,6 +33,7 @@ function App() {
             <p className="text-slate-300 text-lg">{t("app.subtitle")}</p>
           </header>
           <ProductList />
+          <CurrencyDebugPanel />
         </div>
       </div>
     </CurrencyProvider>
