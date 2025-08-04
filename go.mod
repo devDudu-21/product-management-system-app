@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.24.5
 
 require (
-	github.com/mattn/go-sqlite3 v1.14.28
+	github.com/mattn/go-sqlite3 v1.14.30
 	github.com/wailsapp/wails/v2 v2.10.2
 	github.com/xuri/excelize/v2 v2.9.1
 )
